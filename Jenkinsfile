@@ -42,6 +42,7 @@ pipeline{
                 sh "docker-compose down"
             }
         }
+    }
 
     //     stage ('Test'){
     //         steps{
