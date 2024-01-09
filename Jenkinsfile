@@ -25,9 +25,9 @@ pipeline{
             }
         }
 
-        stage ('Containerize App'){
+        stage ('Containers Up!'){
             steps{
-                sh "docker-compose up --build"
+                sh "docker-compose up --build -d"
             }
         }
 
