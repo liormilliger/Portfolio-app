@@ -167,7 +167,7 @@ pipeline{
         always {
             cleanWs()
             script{
-                sh "docker rm -f $(docker ps -aq)"
+                sh "docker rm -f $$(docker ps -aq)"
             }
         }
     }
