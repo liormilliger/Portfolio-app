@@ -2,16 +2,16 @@ pipeline{
     
     agent any
     
-    environment {
-        ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
-        PUBLIC_IP = "???"
-        // EC2_KEY = "EC2_TED_SSH"
-        // PUBLIC_KEY_CONTENT = credentials('liorm-portfolio-key.pem')
-        IAM_ROLE = "liorm-portfolio-roles" #attached to jenkins EC2 instance access to ECR, S3
-        S3-BUCKET = "liorm-portfolio-tfstate-s3" 
+    // environment {
+    //     ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
+    //     PUBLIC_IP = "???"
+    //     // EC2_KEY = "EC2_TED_SSH"
+    //     // PUBLIC_KEY_CONTENT = credentials('liorm-portfolio-key.pem')
+    //     IAM_ROLE = "liorm-portfolio-roles" #attached to jenkins EC2 instance access to ECR, S3
+    //     S3-BUCKET = "liorm-portfolio-tfstate-s3" 
         
 
-    }
+    // }
     options {
         timestamps()
         timeout(time: 10, unit: 'MINUTES')    
