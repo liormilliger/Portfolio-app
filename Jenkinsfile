@@ -31,6 +31,18 @@ pipeline{
             }
         }
 
+        stage ('You got 5 minutes to work') {
+            steps{
+                sh "sleep 300"
+            }
+        }
+
+        stage ('Containers Down') {
+            steps{
+                sh "docker-compose down"
+            }
+        }
+
     //     stage ('Test'){
     //         steps{
     //             sh "sleep 10"
@@ -151,10 +163,11 @@ pipeline{
     //     // }
     // }   
 
-    // post {
-    //     always {
-    //         // cleanWs()
-    //         sh "docker rm -f test" 
-    //     }
+    post {
+        always {
+            cleanWs()
+            sh "docker rm -f $(docker ps -aq)"
+ 
+        }
     }
 }
