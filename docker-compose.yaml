@@ -29,6 +29,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    volumes:
+      - ./app/blog_post.json:/docker-entrypoint-initdb.d/blog_post.json
     networks:
         - backend
   

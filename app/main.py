@@ -30,16 +30,16 @@ def get_all_posts():
     posts = mongo.db.blog_posts.find()
     return render_template("index.html", all_posts=posts)
 
-def show_post(post_id):
+def get_post(post_id):
     try:
         oid = ObjectId(post_id)
-        return(oid)
     except:
         abort(404)
+    return oid
 
 @app.route("/post/<post_id>")
 def show_post(post_id):
-    requested_post = mongo.db.blog_posts.find_one_or_404({"_id": show_post(post_id)})
+    requested_post = mongo.db.blog_posts.find_one_or_404({"_id": get_post(post_id)})
     return render_template("post.html", post=requested_post)
 
 @app.route("/new-post", methods=["GET", "POST"])
@@ -58,9 +58,9 @@ def add_new_post():
         return redirect(url_for("get_all_posts"))
     return render_template("make-post.html", form=form)
 
-@app.route("/edit_post/<post_id>", methods=["GET", "POST"])
+@app.route("/edit_post/<post_id>", methods=["GET", "PUT"])
 def edit_post(post_id):
-    post = mongo.db.blog_posts.find_one_or_404({"_id": post_id})
+    post = mongo.db.blog_posts.find_one_or_404({"_id": get_post(post_id)})
     edit_form = CreatePostForm(
         title=post["title"],
         subtitle=post["subtitle"],
@@ -76,13 +76,13 @@ def edit_post(post_id):
             "author": edit_form.author.data,
             "body": edit_form.body.data,
         }
-        mongo.db.blog_posts.update_one({"_id": post_id}, {"$set": updated_post})
-        return redirect(url_for("show_post", post_id=post_id))
+        mongo.db.blog_posts.update_one({"_id": get_post(post_id)}, {"$set": updated_post})
+        return redirect(url_for("show_post", post_id=get_post(post_id)))
     return render_template("make-post.html", form=edit_form, is_edit=True)
 
 @app.route("/delete/<post_id>", methods=["GET", "DELETE"])
 def delete_post(post_id):
-    mongo.db.blog_posts.delete_one({"_id": post_id})
+    mongo.db.blog_posts.delete_one({"_id": get_post(post_id)})
     return redirect(url_for('get_all_posts'))
 
 @app.route("/about")
