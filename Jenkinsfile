@@ -36,7 +36,7 @@ pipeline{
         }
 
         stage ('Test Mongo') {
-            stpes {
+            steps {
                 echo 'BUILD MONGO-IMG'
                 echo 'SANITY CHECK'
                 echo 'CONNECTIVITY CHECK'
