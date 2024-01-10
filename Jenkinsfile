@@ -76,9 +76,9 @@ pipeline{
             }
         }
 
-        stage ('You got one minute to work') {
+        stage ('You got 5 minute to work') {
             steps{
-                sh "sleep 60"
+                sh "sleep 300"
             }
         }
 
