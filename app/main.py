@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, abort
 from flask_bootstrap import Bootstrap
 from flask_pymongo import PyMongo
 from flask_wtf import FlaskForm
@@ -6,6 +6,7 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditor, CKEditorField
 from datetime import date
+from bson import ObjectId
 import os
 
 app = Flask(__name__)
@@ -23,14 +24,22 @@ class CreatePostForm(FlaskForm):
     body = CKEditorField("Blog Content", validators=[DataRequired()])
     submit = SubmitField("Submit Post")
 
+
 @app.route('/')
 def get_all_posts():
     posts = mongo.db.blog_posts.find()
     return render_template("index.html", all_posts=posts)
 
+def show_post(post_id):
+    try:
+        oid = ObjectId(post_id)
+        return(oid)
+    except:
+        abort(404)
+
 @app.route("/post/<post_id>")
 def show_post(post_id):
-    requested_post = mongo.db.blog_posts.find_one_or_404({"_id": post_id})
+    requested_post = mongo.db.blog_posts.find_one_or_404({"_id": show_post(post_id)})
     return render_template("post.html", post=requested_post)
 
 @app.route("/new-post", methods=["GET", "POST"])
@@ -71,7 +80,7 @@ def edit_post(post_id):
         return redirect(url_for("show_post", post_id=post_id))
     return render_template("make-post.html", form=edit_form, is_edit=True)
 
-@app.route("/delete/<post_id>")
+@app.route("/delete/<post_id>", methods=["GET", "DELETE"])
 def delete_post(post_id):
     mongo.db.blog_posts.delete_one({"_id": post_id})
     return redirect(url_for('get_all_posts'))

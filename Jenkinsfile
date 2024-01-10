@@ -30,7 +30,7 @@ pipeline{
             steps {
                 echo 'BUILD APP-IMG'
                 echo 'SANITY CHECK'
-                echo 'APIs CHECK'
+                echo 'UNIT TEST (PyTest within Dockerfile)'
             }
 
         }
@@ -39,7 +39,6 @@ pipeline{
             steps {
                 echo 'BUILD MONGO-IMG'
                 echo 'SANITY CHECK'
-                echo 'CONNECTIVITY CHECK'
             }
         }
 
@@ -49,6 +48,21 @@ pipeline{
                 echo 'SANITY CHECK'
             }
         }
+
+        stage ('E2E Tests') {
+            steps {
+                echo 'SOME TESTS TO CHECK ALL IS UP AND READY'
+                echo 'docker-compoes up & API check'
+            }
+        }
+        
+        stage ('Containers Up!') {
+            steps{
+                sh "docker-compose up --build -d"
+            }
+        }
+
+        
         stage ('Push Flask-App Images to ECR') {
             steps {
                 echo 'TAG&PUSH APP-IMG'
@@ -57,18 +71,6 @@ pipeline{
             }
         }
 
-        stage ('Containers Up!') {
-            steps{
-                sh "docker-compose up --build -d"
-            }
-        }
-
-        stage ('Liveness Tests') {
-            steps {
-                echo 'SOME TESTS TO CHECK ALL IS UP AND READY'
-            }
-        }
-        
         stage ('Update Config Repo') {
             steps {
                 echo 'CONNECT TO ${CONFIG_REPO}'
