@@ -27,25 +27,34 @@ pipeline{
         }
 
         stage ('Test App') {
-            echo 'BUILD APP-IMG'
-            echo 'SANITY CHECK'
-            echo 'APIs CHECK'
+            steps {
+                echo 'BUILD APP-IMG'
+                echo 'SANITY CHECK'
+                echo 'APIs CHECK'
+            }
+
         }
 
         stage ('Test Mongo') {
-            echo 'BUILD MONGO-IMG'
-            echo 'SANITY CHECK'
-            echo 'CONNECTIVITY CHECK'
+            stpes {
+                echo 'BUILD MONGO-IMG'
+                echo 'SANITY CHECK'
+                echo 'CONNECTIVITY CHECK'
+            }
         }
 
         stage ('Test Nginx') {
-            echo 'BUILD NGINX-IMG'
-            echo 'SANITY CHECK'
+            steps {
+                echo 'BUILD NGINX-IMG'
+                echo 'SANITY CHECK'
+            }
         }
         stage ('Push Flask-App Images to ECR') {
-            echo 'TAG&PUSH APP-IMG'
-            echo 'TAG&PUSH MONGO-IMG'
-            echo 'TAG&PUSH NGINX-IMG'
+            steps {
+                echo 'TAG&PUSH APP-IMG'
+                echo 'TAG&PUSH MONGO-IMG'
+                echo 'TAG&PUSH NGINX-IMG'
+            }
         }
 
         stage ('Containers Up!') {
@@ -55,12 +64,16 @@ pipeline{
         }
 
         stage ('Liveness Tests') {
-            echo 'SOME TESTS TO CHECK ALL IS UP AND READY'
+            steps {
+                echo 'SOME TESTS TO CHECK ALL IS UP AND READY'
+            }
         }
         
         stage ('Update Config Repo') {
-            echo 'CONNECT TO ${CONFIG_REPO}'
-            echo 'UPDATE RELEVANT YAML FILES'
+            steps {
+                echo 'CONNECT TO ${CONFIG_REPO}'
+                echo 'UPDATE RELEVANT YAML FILES'
+            }
         }
 
         stage ('You got one minute to work') {
