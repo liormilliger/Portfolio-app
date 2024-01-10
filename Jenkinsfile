@@ -4,6 +4,7 @@ pipeline{
     
     // environment {
     //     ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
+    //     CONFIG_REPO = 'git@github.com:liormilliger/Portfolio-config.git'
     //     PUBLIC_IP = "???"
     //     // EC2_KEY = "EC2_TED_SSH"
     //     // PUBLIC_KEY_CONTENT = credentials('liorm-portfolio-key.pem')
@@ -18,17 +19,48 @@ pipeline{
     }
 
     stages{
-        stage("Checkout") {
+        stage ("Checkout") {
             steps {
                 deleteDir()
                 checkout scm
             }
         }
 
-        stage ('Containers Up!'){
+        stage ('Test App') {
+            echo 'BUILD APP-IMG'
+            echo 'SANITY CHECK'
+            echo 'APIs CHECK'
+        }
+
+        stage ('Test Mongo') {
+            echo 'BUILD MONGO-IMG'
+            echo 'SANITY CHECK'
+            echo 'CONNECTIVITY CHECK'
+        }
+
+        stage ('Test Nginx') {
+            echo 'BUILD NGINX-IMG'
+            echo 'SANITY CHECK'
+        }
+        stage ('Push Flask-App Images to ECR') {
+            echo 'TAG&PUSH APP-IMG'
+            echo 'TAG&PUSH MONGO-IMG'
+            echo 'TAG&PUSH NGINX-IMG'
+        }
+
+        stage ('Containers Up!') {
             steps{
                 sh "docker-compose up --build -d"
             }
+        }
+
+        stage ('Liveness Tests') {
+            echo 'SOME TESTS TO CHECK ALL IS UP AND READY'
+        }
+        
+        stage ('Update Config Repo') {
+            echo 'CONNECT TO ${CONFIG_REPO}'
+            echo 'UPDATE RELEVANT YAML FILES'
         }
 
         stage ('You got one minute to work') {
