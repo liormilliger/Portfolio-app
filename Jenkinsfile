@@ -57,7 +57,7 @@ pipeline{
             steps{
                 echo "========executing Test=========="
                 script{
-                    sh( script: """#!/bin/bash
+                    sh """#!/bin/bash
                                 for ((i=1; i<=5; i++)); do
                                     responseCode=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost:80)
                                         
@@ -68,7 +68,7 @@ pipeline{
                                         sleep 5
                                     fi
                                 done
-                        """, returnStdout: true).trim()
+                        """
                 }
             }
         }
