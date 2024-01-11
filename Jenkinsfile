@@ -7,7 +7,7 @@ pipeline{
         ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
         CONFIG_REPO = 'git@github.com:liormilliger/Portfolio-config.git'
         // PUBLIC_KEY_CONTENT = credentials('liorm-portfolio-key.pem')
-        IAM_ROLE = "liorm-portfolio-roles" #attached to jenkins EC2 instance access to ECR, S3
+        IAM_ROLE = "liorm-portfolio-roles" 
     }
     options {
         timestamps()
