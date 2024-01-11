@@ -2,17 +2,13 @@ pipeline{
     
     agent any
     
-    // environment {
-    //     ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
-    //     CONFIG_REPO = 'git@github.com:liormilliger/Portfolio-config.git'
-    //     PUBLIC_IP = "???"
-    //     // EC2_KEY = "EC2_TED_SSH"
-    //     // PUBLIC_KEY_CONTENT = credentials('liorm-portfolio-key.pem')
-    //     IAM_ROLE = "liorm-portfolio-roles" #attached to jenkins EC2 instance access to ECR, S3
-    //     S3-BUCKET = "liorm-portfolio-tfstate-s3" 
-        
-
-    // }
+    environment {
+        ECR_USER = '644435390668.dkr.ecr.us-east-1.amazonaws.com'
+        ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
+        CONFIG_REPO = 'git@github.com:liormilliger/Portfolio-config.git'
+        // PUBLIC_KEY_CONTENT = credentials('liorm-portfolio-key.pem')
+        IAM_ROLE = "liorm-portfolio-roles" #attached to jenkins EC2 instance access to ECR, S3
+    }
     options {
         timestamps()
         timeout(time: 10, unit: 'MINUTES')    
@@ -26,26 +22,12 @@ pipeline{
             }
         }
 
-        stage ('Test App') {
+        stage ('Build App-Image') {
             steps {
-                echo 'BUILD APP-IMG'
-                echo 'SANITY CHECK'
-                echo 'UNIT TEST (PyTest within Dockerfile)'
-            }
-
-        }
-
-        stage ('Test Mongo') {
-            steps {
-                echo 'BUILD MONGO-IMG'
-                echo 'SANITY CHECK'
-            }
-        }
-
-        stage ('Test Nginx') {
-            steps {
-                echo 'BUILD NGINX-IMG'
-                echo 'SANITY CHECK'
+                sh """ cd app
+                        docker build -t liorm-portfolio:${BUILD_NUMBER} .
+                """
+                // echo 'UNIT TEST (PyTest within Dockerfile)'
             }
         }
 
@@ -55,19 +37,25 @@ pipeline{
                 echo 'docker-compoes up & API check'
             }
         }
-        
-        stage ('Containers Up!') {
-            steps{
-                sh "docker-compose up --build -d"
+
+        stage('Push App image to ECR') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'AWS Credentials'
+                ]]) {
+                        script {
+                            sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_USER}"
+                            sh "docker tag liorm-portfolio:${BUILD_NUMBER} ${ECR_REPO_URL}:1.0.${BUILD_NUMBER}"
+                            sh "docker push ${ECR_REPO_URL}:1.0.${BUILD_NUMBER}"
+                        }
+                    }
             }
         }
 
-        
-        stage ('Push Flask-App Images to ECR') {
-            steps {
-                echo 'TAG&PUSH APP-IMG'
-                echo 'TAG&PUSH MONGO-IMG'
-                echo 'TAG&PUSH NGINX-IMG'
+        stage ('Containers Up!') {
+            steps{
+                sh "docker-compose up -d"
             }
         }
 
@@ -78,9 +66,9 @@ pipeline{
             }
         }
 
-        stage ('You got 5 minute to work') {
+        stage ('You got 1 minute to work') {
             steps{
-                sh "sleep 300"
+                sh "sleep 60"
             }
         }
 
@@ -91,68 +79,6 @@ pipeline{
         }
     }
 
-    //     stage ('Test'){
-    //         steps{
-    //             sh "sleep 10"
-    //             sh "curl http://localhost" 
-    //         }
-    //     }  
-    //     stage('Build Nginx image') {
-    //         steps {
-    //             sh "docker build -t nginx-img -f ./Dockerfile.nginx ."
-    //         }
-    //     }
-
-    //     stage('Push App image to ECR') {
-    //         steps {
-    //             withCredentials([[
-    //                 $class: 'AmazonWebServicesCredentialsBinding',
-    //                 credentialsId: 'AWS Credentials'
-    //             ]]) {
-    //                 script {
-    //                     sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 644435390668.dkr.ecr.us-east-1.amazonaws.com"
-    //                     sh "docker tag ted-search:latest ${ECR_REPO_URL}:ted-search"
-    //                     sh "docker push ${ECR_REPO_URL}:ted-search"
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     stage('Push Nginx image to ECR') {
-    //         steps {
-    //             withCredentials([[
-    //                 $class: 'AmazonWebServicesCredentialsBinding',
-    //                 credentialsId: 'AWS Credentials'
-    //             ]]) {
-    //                 script {
-    //                     sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 644435390668.dkr.ecr.us-east-1.amazonaws.com"
-    //                     sh "docker tag nginx-img:latest ${ECR_REPO_URL}:nginx-img"
-    //                     sh "docker push ${ECR_REPO_URL}:nginx-img"
-    //                 }
-    //             }
-    //         }
-    //     }  
-
-    //     stage('Copy Files to S3') {
-    //         steps {
-    //             script {
-    //                 // Set your AWS credentials (assuming you've already configured them in Jenkins)
-    //                 withCredentials([[
-    //                     $class: 'AmazonWebServicesCredentialsBinding',
-    //                     credentialsId: 'AWS Credentials'
-    //                 ]]) {
-    //                     def bucketName = 'liorm-ted'
-    //                     def s3Path = 'userdata/'
-    //                     sh "aws s3 cp ./target/embedash-1.1-SNAPSHOT.jar s3://${bucketName}/${s3Path}embedash-1.1-SNAPSHOT.jar"
-    //                     // sh "aws s3 cp ./Dockerfile s3://${bucketName}/${s3Path}Dockerfile"
-    //                     // sh "aws s3 cp ./Dockerfile.nginx s3://${bucketName}/${s3Path}Dockerfile.nginx"
-    //                     sh "aws s3 cp ./docker-compose.yaml s3://${bucketName}/${s3Path}docker-compose.yaml"
-    //                     sh "aws s3 cp ./nginx.conf s3://${bucketName}/${s3Path}nginx.conf"
-    //                 }
-    //             }
-    //         }
-    //     }
-   
     //     stage('get_commit_msg') {
     //         steps {
     //             script {
@@ -217,6 +143,7 @@ pipeline{
             script{
                 // sh 'docker rm -f $(docker ps -aq)'
                 sh "docker rm -f mongo app nginx"
+                sh "docker rmi mongo:5.0 nginx blog:${BUILD_NUMBER}"
             }
         }
     }
