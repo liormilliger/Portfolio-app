@@ -154,11 +154,11 @@ pipeline{
     post {
         always {
             cleanWs()
-            script{
-                // sh 'docker rm -f $(docker ps -aq)'
-                // sh "docker rm -f mongo app nginx"
-                sh "docker rmi mongo:5.0 liorm-portfolio:${BUILD_NUMBER}"
-            }
+            // script{
+            //     // sh 'docker rm -f $(docker ps -aq)'
+            //     // sh "docker rm -f mongo app nginx"
+            //     sh "docker rmi mongo:5.0 liorm-portfolio:${BUILD_NUMBER}"
+            // }
         }
     }
 }
