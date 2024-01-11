@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   flask-app:
-    image: 644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio::1.0.${BUILD_NUMBER}
+    image: 644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio:1.0.${BUILD_NUMBER}
     # build:
     #   context: ./app
     command: 'sh -c "sleep 10s ; python main.py"'
