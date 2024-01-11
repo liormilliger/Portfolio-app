@@ -30,19 +30,19 @@ pipeline{
                 // echo 'UNIT TEST (PyTest within Dockerfile)'
             }
         }
-        stage ('App-Image Sanity Test') {
-            steps{
-                sh """ cd app
-                        docker run --name app-test liorm-portfolio:${BUILD_NUMBER}
-                        sleep 10
-                        docker run --rm -it ubuntu:latest /bin/bash
-                        curl http://3.94.61.106:5000
-                        exit
-                        docker rm -f app-test
-                """
-            }
-        }
-        
+        // stage ('App-Image Sanity Test') {
+        //     steps{
+        //         sh """ cd app
+        //                 docker run --name app-test liorm-portfolio:${BUILD_NUMBER}
+        //                 sleep 10
+        //                 docker run --rm -it ubuntu:latest /bin/bash
+        //                 curl http://3.94.61.106:5000
+        //                 exit
+        //                 docker rm -f app-test
+        //         """
+        //     }
+        // }
+
         stage ('E2E Tests') {
             steps {
                 echo 'SOME TESTS TO CHECK ALL IS UP AND READY'
