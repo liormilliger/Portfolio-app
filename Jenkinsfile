@@ -58,11 +58,12 @@ pipeline{
                 echo "========executing Test=========="
                 script{
                     sh """#!/bin/bash
-                                for ((i=1; i<=5; i++)); do
+                                for ((i=1; i<=10; i++)); do
                                     responseCode=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost:80)
                                         
                                     if [[ \${responseCode} == '200' ]]; then
                                         echo "Health check succeeded. HTTP response code: \${responseCode}"
+                                        break
                                     else
                                         echo "Health check failed. HTTP response code: \${responseCode}. Retrying in 5 seconds..."
                                         sleep 5
