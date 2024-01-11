@@ -30,23 +30,48 @@ pipeline{
                 // echo 'UNIT TEST (PyTest within Dockerfile)'
             }
         }
-        stage ('App-Image Sanity Test') {
+        // stage ('App-Image Sanity Test') {
+        //     steps{
+        //         script{
+        //             sh """  docker compose up --build -d
+        //                 sleep 15
+        //                 responsecode1 = curl -fI http://3.94.61.106
+        //                 responsecode2 = curl -fI http://localhost:80
+        //                 responsecode3 = curl -fI http://10.0.3.87
+        //                 echo "from EC2 public ip:" responsecode1
+        //                 echo "from within Jenkins:" responsecode2
+        //                 echo "from EC2 private ip:" responsecode3
+        //                 docker compose down
+        //             """
+        //         }
+        //     }
+        // }
+        
+        stage ('Containers Up!') {
             steps{
-                script{
-                    sh """  docker compose up --build -d
-                        sleep 15
-                        responsecode1 = curl -fI http://3.94.61.106
-                        responsecode2 = curl -fI http://localhost:80
-                        responsecode3 = curl -fI http://10.0.3.87
-                        echo "from EC2 public ip:" responsecode1
-                        echo "from within Jenkins:" responsecode2
-                        echo "from EC2 private ip:" responsecode3
-                        docker compose down
-                    """
-                }
+                sh "docker-compose up -d"
             }
         }
 
+        stage("Test"){
+            steps{
+                echo "========executing Test=========="
+                script{
+                    sh( script: """
+                                for ((i=1; i<=5; i++)); do
+                                    responseCode=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost:80)
+                                        
+                                    if [[ \${responseCode} == '200' ]]; then
+                                        echo "Health check succeeded. HTTP response code: \${responseCode}"
+                                    else
+                                        echo "Health check failed. HTTP response code: \${responseCode}. Retrying in 5 seconds..."
+                                        sleep 5
+                                    fi
+                                done
+                        """, returnStdout: true).trim()
+                }
+            }
+        }
         stage ('E2E Tests') {
             steps {
                 echo 'SOME TESTS TO CHECK ALL IS UP AND READY'
@@ -69,11 +94,11 @@ pipeline{
             }
         }
 
-        stage ('Containers Up!') {
-            steps{
-                sh "docker-compose up -d"
-            }
-        }
+        // stage ('Containers Up!') {
+        //     steps{
+        //         sh "docker-compose up -d"
+        //     }
+        // }
 
         stage ('Update Config Repo') {
             steps {
