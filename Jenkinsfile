@@ -30,18 +30,16 @@ pipeline{
                 // echo 'UNIT TEST (PyTest within Dockerfile)'
             }
         }
-        // stage ('App-Image Sanity Test') {
-        //     steps{
-        //         sh """ cd app
-        //                 docker run --name app-test liorm-portfolio:${BUILD_NUMBER}
-        //                 sleep 10
-        //                 docker run --rm -it ubuntu:latest /bin/bash
-        //                 curl http://3.94.61.106:5000
-        //                 exit
-        //                 docker rm -f app-test
-        //         """
-        //     }
-        // }
+        stage ('App-Image Sanity Test') {
+            steps{
+                sh """  docker compose up --build -d
+                        sleep 15
+                        responsecode = curl -fI http://3.94.61.106
+                        echo ${responsecode}
+                        docker compose down
+                """
+            }
+        }
 
         stage ('E2E Tests') {
             steps {
@@ -78,9 +76,9 @@ pipeline{
             }
         }
 
-        stage ('You got 5 minute to work') {
+        stage ('You got half minute to work') {
             steps{
-                sh "sleep 300"
+                sh "sleep 30"
             }
         }
 
