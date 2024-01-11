@@ -142,8 +142,8 @@ pipeline{
             cleanWs()
             script{
                 // sh 'docker rm -f $(docker ps -aq)'
-                sh "docker rm -f mongo app nginx"
-                sh "docker rmi mongo:5.0 nginx blog:${BUILD_NUMBER}"
+                // sh "docker rm -f mongo app nginx"
+                sh "docker rmi mongo:5.0 images-nginx liorm-portfolio:${BUILD_NUMBER}"
             }
         }
     }
