@@ -1,3 +1,4 @@
+bson
 certifi
 chardet
 click
@@ -10,6 +11,8 @@ Flask-WTF
 idna
 itsdangerous
 Jinja2
+json
+logging
 MarkupSafe
 pymongo
 requests

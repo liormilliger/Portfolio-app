@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, abort
+from flask import Flask, render_template, redirect, url_for, abort, request
 from flask_bootstrap import Bootstrap
 from flask_pymongo import PyMongo
 from flask_wtf import FlaskForm
@@ -7,6 +7,8 @@ from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditor, CKEditorField
 from datetime import date
 from bson import ObjectId
+import logging
+import json
 import os
 
 app = Flask(__name__)
@@ -24,12 +26,41 @@ class CreatePostForm(FlaskForm):
     body = CKEditorField("Blog Content", validators=[DataRequired()])
     submit = SubmitField("Submit Post")
 
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        log_record = {
+            "time": self.formatTime(record, self.datefmt),
+            "level": record.levelname,
+            "message": record.getMessage()
+        }
+        if record.exc_info:
+            log_record["exc_info"] = self.formatException(record.exc_info)
+        return json.dumps(log_record)
+
+# Initialize the Flask app
+app = Flask(__name__)
+# ... other app configurations ...
+
+# Setup logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+log_handler = logging.FileHandler('app.log')
+log_handler.setFormatter(JsonFormatter())
+logger.addHandler(log_handler)
+
+def log_request_info():
+    logger.info(f"Request: {request.method} {request.url} from {request.remote_addr}")
+
 
 @app.route('/')
 def get_all_posts():
-    posts = mongo.db.blog.find()
-    return render_template("index.html", all_posts=posts)
-
+    try:
+        posts = mongo.db.blog.find()
+        logger.info("Processed request successfully.")
+        return render_template("index.html", all_posts=posts)
+    except Exception as e:
+        logger.error(f"Error processing request: {e}", exc_info=True)
+    
 def get_post(post_id):
     try:
         oid = ObjectId(post_id)
@@ -58,7 +89,7 @@ def add_new_post():
         return redirect(url_for("get_all_posts"))
     return render_template("make-post.html", form=form)
 
-@app.route("/edit_post/<post_id>", methods=["GET", "PUT"])
+@app.route("/edit_post/<post_id>", methods=["GET", "PUT", "POST"])
 def edit_post(post_id):
     post = mongo.db.blog.find_one_or_404({"_id": get_post(post_id)})
     edit_form = CreatePostForm(
