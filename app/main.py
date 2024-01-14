@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, abort, request
+from flask import Flask, render_template, redirect, url_for, abort
 from flask_bootstrap import Bootstrap
 from flask_pymongo import PyMongo
 from flask_wtf import FlaskForm
@@ -36,10 +36,6 @@ class JsonFormatter(logging.Formatter):
         if record.exc_info:
             log_record["exc_info"] = self.formatException(record.exc_info)
         return json.dumps(log_record)
-
-# Initialize the Flask app
-app = Flask(__name__)
-# ... other app configurations ...
 
 # Setup logging
 logger = logging.getLogger()
