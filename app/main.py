@@ -40,7 +40,7 @@ class JsonFormatter(logging.Formatter):
 # Setup logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-log_handler = logging.FileHandler('app.log')
+log_handler = logging.StreamHandler()
 log_handler.setFormatter(JsonFormatter())
 logger.addHandler(log_handler)
 
