@@ -44,18 +44,10 @@ log_handler = logging.FileHandler('app.log')
 log_handler.setFormatter(JsonFormatter())
 logger.addHandler(log_handler)
 
-def log_request_info():
-    logger.info(f"Request: {request.method} {request.url} from {request.remote_addr}")
-
-
 @app.route('/')
 def get_all_posts():
-    try:
-        posts = mongo.db.blog.find()
-        logger.info("Processed request successfully.")
-        return render_template("index.html", all_posts=posts)
-    except Exception as e:
-        logger.error(f"Error processing request: {e}", exc_info=True)
+    posts = mongo.db.blog.find()
+    return render_template("index.html", all_posts=posts)
     
 def get_post(post_id):
     try:
