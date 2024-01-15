@@ -25,25 +25,25 @@ class CreatePostForm(FlaskForm):
     img_url = StringField("Blog Image URL", validators=[DataRequired(), URL()])
     body = CKEditorField("Blog Content", validators=[DataRequired()])
     submit = SubmitField("Submit Post")
+#============================================================
+# # Define a standard formatter
+# class StandardFormatter(logging.Formatter):
+#     def __init__(self, fmt=None, datefmt=None):
+#         super().__init__(fmt, datefmt)
 
-# Define a standard formatter
-class StandardFormatter(logging.Formatter):
-    def __init__(self, fmt=None, datefmt=None):
-        super().__init__(fmt, datefmt)
+# # Setup logging
+# logger = logging.getLogger()
+# logger.setLevel(logging.INFO)
 
-# Setup logging
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+# # Use a more human-readable format for the logs
+# standard_format = '%(asctime)s - %(levelname)s - %(message)s'
+# date_format = '%Y-%m-%d %H:%M:%S'
+# formatter = StandardFormatter(standard_format, date_format)
 
-# Use a more human-readable format for the logs
-standard_format = '%(asctime)s - %(levelname)s - %(message)s'
-date_format = '%Y-%m-%d %H:%M:%S'
-formatter = StandardFormatter(standard_format, date_format)
-
-log_handler = logging.StreamHandler()
-log_handler.setFormatter(formatter)
-logger.addHandler(log_handler)
-
+# log_handler = logging.StreamHandler()
+# log_handler.setFormatter(formatter)
+# logger.addHandler(log_handler)
+#=======================================================================
 # class JsonFormatter(logging.Formatter):
 #     def format(self, record):
 #         log_record = {
