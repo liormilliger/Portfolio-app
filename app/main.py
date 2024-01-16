@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, abort
+from flask import Flask, render_template, redirect, url_for, abort, request
 from flask_bootstrap import Bootstrap
 from flask_pymongo import PyMongo
 from flask_wtf import FlaskForm
@@ -7,9 +7,10 @@ from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditor, CKEditorField
 from datetime import date
 from bson import ObjectId
-import logging
-import json
 import os
+from prometheus_flask_exporter import PrometheusMetrics
+
+# import metrics
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
@@ -17,6 +18,9 @@ app.config['MONGO_URI'] = os.environ.get('MONGO_URI')  # Set your MongoDB URI
 mongo = PyMongo(app)
 Bootstrap(app)
 ckeditor = CKEditor(app)
+metrics = PrometheusMetrics(app)
+
+# import metrics
 
 class CreatePostForm(FlaskForm):
     title = StringField("Blog Post Title", validators=[DataRequired()])
@@ -25,43 +29,7 @@ class CreatePostForm(FlaskForm):
     img_url = StringField("Blog Image URL", validators=[DataRequired(), URL()])
     body = CKEditorField("Blog Content", validators=[DataRequired()])
     submit = SubmitField("Submit Post")
-#============================================================
-# # Define a standard formatter
-# class StandardFormatter(logging.Formatter):
-#     def __init__(self, fmt=None, datefmt=None):
-#         super().__init__(fmt, datefmt)
-
-# # Setup logging
-# logger = logging.getLogger()
-# logger.setLevel(logging.INFO)
-
-# # Use a more human-readable format for the logs
-# standard_format = '%(asctime)s - %(levelname)s - %(message)s'
-# date_format = '%Y-%m-%d %H:%M:%S'
-# formatter = StandardFormatter(standard_format, date_format)
-
-# log_handler = logging.StreamHandler()
-# log_handler.setFormatter(formatter)
-# logger.addHandler(log_handler)
-#=======================================================================
-# class JsonFormatter(logging.Formatter):
-#     def format(self, record):
-#         log_record = {
-#             "time": self.formatTime(record, self.datefmt),
-#             "level": record.levelname,
-#             "message": record.getMessage()
-#         }
-#         if record.exc_info:
-#             log_record["exc_info"] = self.formatException(record.exc_info)
-#         return json.dumps(log_record)
-
-# # Setup logging
-# logger = logging.getLogger()
-# logger.setLevel(logging.INFO)
-# log_handler = logging.StreamHandler()
-# log_handler.setFormatter(JsonFormatter())
-# logger.addHandler(log_handler)
-
+    
 @app.route('/')
 def get_all_posts():
     posts = mongo.db.blog.find()
@@ -130,5 +98,41 @@ def about():
 def contact():
     return render_template("contact.html")
 
+# -----------------[ Metrics Start ]---------------------
+
+
+# Custom Metrics
+page_view_counter = metrics.counter(
+    'page_views', 'Number of page views',
+    labels={'endpoint': None}
+)
+unique_visitors_counter = metrics.counter(
+    'unique_visitors', 'Number of unique visitors',
+    labels={'visitor_id': None}
+)
+session_duration_summary = metrics.summary(
+    'session_duration', 'Session duration',
+    labels={'session_id': None}
+)
+
+# Example of incrementing page views in a route
+@app.route('/view_blog/<blog_id>')
+def view_blog(blog_id):
+    # Increment the page view counter
+    page_view_counter.labels(endpoint=request.path).inc()
+
+    # Your existing logic to serve the blog post
+    # ...
+
+    return "Blog Content"
+
+# Initialize the metrics endpoint
+metrics.register_default(
+    metrics.counter(
+        'by_path_counter', 'Request count by request paths',
+        labels={'path': lambda: request.path}
+    )
+)
+# -------------------[ Metrics End ] -------------------------
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

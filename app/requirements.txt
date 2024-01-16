@@ -11,6 +11,7 @@ idna
 itsdangerous
 Jinja2
 MarkupSafe
+prometheus_flask_exporter
 pymongo
 requests
 urllib3
