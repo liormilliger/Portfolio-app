@@ -115,6 +115,10 @@ session_duration_summary = metrics.summary(
     labels={'session_id': None}
 )
 
+@app.route('/api')
+def index():
+    return 'ok'
+
 # Example of incrementing page views in a route
 @app.route('/view_blog/<blog_id>')
 def view_blog(blog_id):
