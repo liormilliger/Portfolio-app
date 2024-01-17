@@ -19,8 +19,8 @@ metrics.info('app_info', 'Application info', version='1.0.3')
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 app.config['MONGO_URI'] = os.environ.get('MONGO_URI')  # Set your MongoDB URI
 mongo = PyMongo(app)
-# Bootstrap(app)
-# ckeditor = CKEditor(app)
+Bootstrap(app)
+ckeditor = CKEditor(app)
 
 
 # import metrics
