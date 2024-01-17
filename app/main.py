@@ -115,9 +115,9 @@ def contact():
 #     labels={'session_id': None}
 # )
 
-# @app.route('/api')
-# def index():
-#     return 'ok'
+@app.route('/api')
+def index():
+    return 'ok'
 
 # # Example of incrementing page views in a route
 # @app.route('/view_blog/<blog_id>')
@@ -131,12 +131,12 @@ def contact():
 #     return "Blog Content"
 
 # Initialize the metrics endpoint
-# metrics.register_default(
-#     metrics.counter(
-#         'by_path_counter', 'Request count by request paths',
-#         labels={'path': lambda: request.path}
-#     )
-# )
+metrics.register_default(
+    metrics.counter(
+        'by_path_counter', 'Request count by request paths',
+        labels={'path': lambda: request.path}
+    )
+)
 # -------------------[ Metrics End ] -------------------------
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
