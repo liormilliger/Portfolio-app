@@ -1,7 +1,9 @@
 pipeline{
     
     agent any
-    
+    triggers {
+        pollSCM('* * * * *')
+    }
     environment {
         ECR_USER = '644435390668.dkr.ecr.us-east-1.amazonaws.com'
         ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
