@@ -14,13 +14,14 @@ from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
 metrics = PrometheusMetrics(app)
+metrics.info('app_info', 'Application info', version='1.0.3')
+
+app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 app.config['MONGO_URI'] = os.environ.get('MONGO_URI')  # Set your MongoDB URI
 mongo = PyMongo(app)
 Bootstrap(app)
-ckeditor = CKEdiapp.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
-tor(app)
+ckeditor = CKEditor(app)
 
-metrics.info('app_info', 'Application info', version='1.0.3')
 
 # import metrics
 
