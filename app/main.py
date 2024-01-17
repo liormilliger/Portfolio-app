@@ -104,19 +104,15 @@ def contact():
 # Custom Metrics
 page_view_counter = metrics.counter(
     'page_views', 'Number of page views',
-    # labels={'endpoint': None}
-    labels=['endpoint']
+    labels={'endpoint': None}
 )
 unique_visitors_counter = metrics.counter(
     'unique_visitors', 'Number of unique visitors',
-    # labels={'visitor_id': None}
-    labels=['visitor_id']
+    labels={'visitor_id': None}
 )
 session_duration_summary = metrics.summary(
     'session_duration', 'Session duration',
-    labels=['session_id']
-
-    # labels={'session_id': None}
+    labels={'session_id': None}
 )
 
 @app.route('/api')
