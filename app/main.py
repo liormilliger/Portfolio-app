@@ -13,12 +13,14 @@ from prometheus_flask_exporter import PrometheusMetrics
 # import metrics
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+metrics = PrometheusMetrics(app)
 app.config['MONGO_URI'] = os.environ.get('MONGO_URI')  # Set your MongoDB URI
 mongo = PyMongo(app)
 Bootstrap(app)
-ckeditor = CKEditor(app)
-metrics = PrometheusMetrics(app)
+ckeditor = CKEdiapp.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+tor(app)
+
+metrics.info('app_info', 'Application info', version='1.0.3')
 
 # import metrics
 
@@ -31,6 +33,8 @@ class CreatePostForm(FlaskForm):
     submit = SubmitField("Submit Post")
     
 @app.route('/')
+@metrics.counter('invocation_by_type', 'Number of invocations by type',
+         labels={'item_type': lambda: request.view_args['type']})
 def get_all_posts():
     posts = mongo.db.blog.find()
     return render_template("index.html", all_posts=posts)
@@ -114,10 +118,6 @@ def contact():
 #     'session_duration', 'Session duration',
 #     labels={'session_id': None}
 # )
-
-@app.route('/api')
-def index():
-    return 'ok'
 
 # # Example of incrementing page views in a route
 # @app.route('/view_blog/<blog_id>')
