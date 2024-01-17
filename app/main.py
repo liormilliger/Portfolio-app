@@ -14,7 +14,7 @@ from prometheus_flask_exporter import PrometheusMetrics
 # # import metrics
 
 app = Flask(__name__)
-metrics = PrometheusMetrics(app)
+PrometheusMetrics(app)
 # metrics.info('app_info', 'Application info', version='1.0.3')
 
 # app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
