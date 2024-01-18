@@ -114,7 +114,7 @@ pipeline{
                         sh "git clone ${CONFIG_REPO} config-repo"
 
 
-                        sh 'echo "This line was added by Jenkins" >> blog-app/templates/app-deployment.yaml'
+                        sh "echo 'This line was added by Jenkins' >> blog-app/templates/app-deployment.yaml"
                         
                         
                         // Change directory to the cloned repo
