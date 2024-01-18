@@ -206,15 +206,12 @@ pipeline{
         always {
             cleanWs()
             
-            script {
-                sh '''
-                    docker rmi -f $(docker images -q)
-                    docker rm volume -f $(docker volume ls -q)
-                '''
-            // script{
-            //     // sh 'docker rm -f $(docker ps -aq)'
-            //     // sh "docker rm -f mongo app nginx"
-            }
+            // script {
+            //     sh '''
+            //         docker rmi -f $(docker images -q)
+            //         docker rm volume -f $(docker volume ls -q)
+            //     '''
+            // }
         }
     }
 }
