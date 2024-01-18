@@ -184,10 +184,11 @@ pipeline{
     post {
         always {
             cleanWs()
+            sh "docker rmi -f $(docker images -q)"
+            sh "docker rm volume -f $(docker volume ls -q)"
             // script{
             //     // sh 'docker rm -f $(docker ps -aq)'
             //     // sh "docker rm -f mongo app nginx"
-            //     sh "docker rmi mongo:5.0 liorm-portfolio:${BUILD_NUMBER}"
             // }
         }
     }
