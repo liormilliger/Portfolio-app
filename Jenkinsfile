@@ -129,7 +129,7 @@ pipeline{
                                 git config user.email "jenkins@example.com"
                                 git config user.name "Jenkins"
                                 git add blog-app/templates/app-deployment.yaml
-                                git commit -m "Update image to ${imageTag} with love, Jenkins"
+                                git commit -m "Update image to testing with love, Jenkins"
                                 git push origin main
                             """
                         }
