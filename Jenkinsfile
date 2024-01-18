@@ -115,17 +115,10 @@ pipeline{
 
                         dir('config-repo') {
                             sh "ls -la"
-                            // sh "echo 'This line was added by Jenkins' >> blog-app/templates/app-deployment.yaml"
-                            String imageTag = "1.0.${BUILD_NUMBER}" // Replace with your image tag
+                            String imageTag = "1.0.${BUILD_NUMBER}"
                             sh "sed -i 's|${ECR_REPO_URL}:1.0.[0-9]*|${ECR_REPO_URL}:${imageTag}|' blog-app/templates/app-deployment.yaml"
-
-                        
-                        // Change directory to the cloned repo
-                        // dir('config-repo') {
-                        //     // Update the image in app-deployment.yaml
-                        //     sh "sed -i 's|image: .\\+/blog:.\\+|image: ${imageTag}|' blog-app/templates/app-deployment.yaml"
-                        // }
-                            // Git commit and push
+                            
+                           // Git commit and push
                             sh """
                                 git config user.email "jenkins@example.com"
                                 git config user.name "Jenkins"
