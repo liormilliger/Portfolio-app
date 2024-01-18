@@ -113,8 +113,9 @@ pipeline{
                         // Clone the configuration repository
                         sh "git clone ${CONFIG_REPO} config-repo"
 
-
-                        sh "echo 'This line was added by Jenkins' >> blog-app/templates/app-deployment.yaml"
+                        dir('config-repo') {
+                            sh "ls -la"
+                            sh "echo 'This line was added by Jenkins' >> blog-app/templates/app-deployment.yaml"
                         
                         
                         // Change directory to the cloned repo
@@ -124,14 +125,14 @@ pipeline{
                         //     sh "sed -i 's|image: .\\+/blog:.\\+|image: ${imageTag}|' blog-app/templates/app-deployment.yaml"
                         // }
                             // Git commit and push
-                        sh """
-                            git config user.email "jenkins@example.com"
-                            git config user.name "Jenkins"
-                            git add blog-app/templates/app-deployment.yaml
-                            git commit -m "Update image to ${imageTag} with love, Jenkins"
-                            git push origin main
-                        """
-                        
+                            sh """
+                                git config user.email "jenkins@example.com"
+                                git config user.name "Jenkins"
+                                git add blog-app/templates/app-deployment.yaml
+                                git commit -m "Update image to ${imageTag} with love, Jenkins"
+                                git push origin main
+                            """
+                        }
                     }
                 }    
             }
