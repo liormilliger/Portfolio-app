@@ -9,7 +9,8 @@ pipeline{
         ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
         CONFIG_REPO = 'git@github.com:liormilliger/Portfolio-config.git'
         // PUBLIC_KEY_CONTENT = credentials('liorm-portfolio-key.pem')
-        IAM_ROLE = "liorm-portfolio-roles" 
+        IAM_ROLE = "liorm-portfolio-roles"
+        GIT_SSH_KEY = "GitHub-key"
     }
     options {
         timestamps()
@@ -102,29 +103,31 @@ pipeline{
         //         sh "docker-compose up -d"
         //     }
         // }
-
         stage ( 'Update Config-Repo' ) {
             steps {
-                script {
-                    // Clone the configuration repository
-                    sh "git clone ${CONFIG_REPO} config-repo"
+                sshagent(["${GIT_SSH_KEY}"]) {
 
-                    // Change directory to the cloned repo
-                    dir('config-repo') {
-                        // Update the image in app-deployment.yaml
-                        String imageTag = "${ECR_REPO_URL}:1.0.${BUILD_NUMBER}" // Replace with your image tag
-                        sh "sed -i 's|image: .\\+/blog:.\\+|image: ${imageTag}|' blog-app/templates/app-deployment.yaml"
+                    script {
+                        // Clone the configuration repository
+                        sh "git clone ${CONFIG_REPO} config-repo"
 
-                        // Git commit and push
-                        sh """
-                            git config user.email "jenkins@example.com"
-                            git config user.name "Jenkins"
-                            git add blog-app/templates/app-deployment.yaml
-                            git commit -m "Update image to ${imageTag} with love, Jenkins"
-                            git push origin main
-                        """
+                        // Change directory to the cloned repo
+                        dir('config-repo') {
+                            // Update the image in app-deployment.yaml
+                            String imageTag = "${ECR_REPO_URL}:1.0.${BUILD_NUMBER}" // Replace with your image tag
+                            sh "sed -i 's|image: .\\+/blog:.\\+|image: ${imageTag}|' blog-app/templates/app-deployment.yaml"
+
+                            // Git commit and push
+                            sh """
+                                git config user.email "jenkins@example.com"
+                                git config user.name "Jenkins"
+                                git add blog-app/templates/app-deployment.yaml
+                                git commit -m "Update image to ${imageTag} with love, Jenkins"
+                                git push origin main
+                            """
+                        }
                     }
-                }
+                }    
             }
         }
 
