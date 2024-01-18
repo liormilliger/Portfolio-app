@@ -20,7 +20,7 @@ pipeline{
     stages{
         stage ("Checkout") {
             steps {
-                deleteDir()
+                // deleteDir()
                 checkout scm
             }
         }
@@ -103,33 +103,35 @@ pipeline{
         //         sh "docker-compose up -d"
         //     }
         // }
-        stage ( 'Update Config-Repo' ) {
-            steps {
-                sshagent(["${GIT_SSH_KEY}"]) {
+        
+        
+        // stage ( 'Update Config-Repo' ) {
+        //     steps {
+        //         sshagent(["${GIT_SSH_KEY}"]) {
 
-                    script {
-                        // Clone the configuration repository
-                        sh "git clone ${CONFIG_REPO} config-repo"
+        //             script {
+        //                 // Clone the configuration repository
+        //                 sh "git clone ${CONFIG_REPO} config-repo"
 
-                        // Change directory to the cloned repo
-                        dir('config-repo') {
-                            // Update the image in app-deployment.yaml
-                            String imageTag = "${ECR_REPO_URL}:1.0.${BUILD_NUMBER}" // Replace with your image tag
-                            sh "sed -i 's|image: .\\+/blog:.\\+|image: ${imageTag}|' blog-app/templates/app-deployment.yaml"
+        //                 // Change directory to the cloned repo
+        //                 dir('config-repo') {
+        //                     // Update the image in app-deployment.yaml
+        //                     String imageTag = "${ECR_REPO_URL}:1.0.${BUILD_NUMBER}" // Replace with your image tag
+        //                     sh "sed -i 's|image: .\\+/blog:.\\+|image: ${imageTag}|' blog-app/templates/app-deployment.yaml"
 
-                            // Git commit and push
-                            sh """
-                                git config user.email "jenkins@example.com"
-                                git config user.name "Jenkins"
-                                git add blog-app/templates/app-deployment.yaml
-                                git commit -m "Update image to ${imageTag} with love, Jenkins"
-                                git push origin main
-                            """
-                        }
-                    }
-                }    
-            }
-        }
+        //                     // Git commit and push
+        //                     sh """
+        //                         git config user.email "jenkins@example.com"
+        //                         git config user.name "Jenkins"
+        //                         git add blog-app/templates/app-deployment.yaml
+        //                         git commit -m "Update image to ${imageTag} with love, Jenkins"
+        //                         git push origin main
+        //                     """
+        //                 }
+        //             }
+        //         }    
+        //     }
+        // }
 
         stage ('You got half minute to work') {
             steps{
