@@ -41,7 +41,7 @@ services:
     ports:
       - "80:80"
     networks:
-     - frontend
+      - frontend
     depends_on:
       - flask-app
 
