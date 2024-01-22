@@ -8,10 +8,20 @@ from flask_ckeditor import CKEditor, CKEditorField
 from datetime import date
 from bson import ObjectId
 import os
+import logging
+import sys
+import json_log_formatter
 # from prometheus_flask_exporter import PrometheusMetrics
 
 # # import metrics
+formatter = json_log_formatter.JSONFormatter()
 
+json_handler = logging.StreamHandler(sys.stdout)
+json_handler.setFormatter(formatter)
+
+logger = logging.getLogger('my_json')
+logger.addHandler(json_handler)
+logger.setLevel(logging.INFO)
 app = Flask(__name__)
 # PrometheusMetrics(app)
 # # metrics.info('app_info', 'Application info', version='1.0.3')
@@ -34,6 +44,7 @@ class CreatePostForm(FlaskForm):
 # @metrics.counter('invocation_by_type', 'Number of invocations by type',
 #          labels={'item_type': lambda: request.view_args['type']})
 def get_all_posts():
+    logger.info('Fetching all posts', extra={'path': '/'})
     posts = mongo.db.blog.find()
     return render_template("index.html", all_posts=posts)
     
