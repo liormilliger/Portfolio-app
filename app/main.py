@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, abort, request
+from flask import Flask, render_template, redirect, url_for, abort, request, has_request_context
 from flask_bootstrap import Bootstrap
 from flask_pymongo import PyMongo
 from flask_wtf import FlaskForm
@@ -32,6 +32,12 @@ class JsonFormatter(logging.Formatter):
             "message": record.getMessage(),
             "time": self.formatTime(record, self.datefmt)
         }
+        
+        if has_request_context():
+            log_record["method"] = request.method
+        else:
+            log_record["method"] = None
+        
         return json.dumps(log_record)
 
 # Initialize logger for the app
@@ -65,6 +71,7 @@ def get_post(post_id):
 
 @app.route("/post/<post_id>")
 def show_post(post_id):
+    app.logger.info(f"new post {post_id}")
     requested_post = mongo.db.blog.find_one_or_404({"_id": get_post(post_id)})
     return render_template("post.html", post=requested_post)
 
