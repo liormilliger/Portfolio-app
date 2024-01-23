@@ -32,17 +32,23 @@ class JsonFormatter(logging.Formatter):
             "message": record.getMessage(),
             "time": self.formatTime(record, self.datefmt)
         }
-        
+        if record.exc_info:
+            log_record["exc_info"] = self.formatException(record.exc_info)
+            return json.dumps(log_record)
         if has_request_context():
             log_record["method"] = request.method
         else:
             log_record["method"] = None
-        
         return json.dumps(log_record)
 
 # Initialize logger for the app
 handler = logging.StreamHandler()
 handler.setFormatter(JsonFormatter())
+# Disable default Flask logging
+log = logging.getLogger('werkzeug')
+log.disabled = True
+app.logger.handlers = []
+
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 
@@ -77,6 +83,7 @@ def show_post(post_id):
 
 @app.route("/new-post", methods=["GET", "POST"])
 def add_new_post():
+    app.logger.info('New-post')
     form = CreatePostForm()
     if form.validate_on_submit():
         new_post = {
@@ -93,6 +100,7 @@ def add_new_post():
 
 @app.route("/edit_post/<post_id>", methods=["GET", "PUT", "POST"])
 def edit_post(post_id):
+    app.logger.info('posts edit')
     post = mongo.db.blog.find_one_or_404({"_id": get_post(post_id)})
     edit_form = CreatePostForm(
         title=post["title"],
@@ -115,15 +123,18 @@ def edit_post(post_id):
 
 @app.route("/delete/<post_id>", methods=["GET", "DELETE"])
 def delete_post(post_id):
+    app.logger.info('Delete posts')
     mongo.db.blog.delete_one({"_id": get_post(post_id)})
     return redirect(url_for('get_all_posts'))
 
 @app.route("/about")
 def about():
+    app.logger.info('About shit')
     return render_template("about.html")
 
 @app.route("/contact")
 def contact():
+    app.logger.info('Dont ever call me again')
     return render_template("contact.html")
 
 # -----------------[ Metrics Start ]---------------------
@@ -161,6 +172,6 @@ def contact():
 #         labels={'path': lambda: request.path}
 #     )
 # )
-# -------------------[ Metrics End ] -------------------------
+# # -------------------[ Metrics End ] -------------------------
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
