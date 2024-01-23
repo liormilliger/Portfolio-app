@@ -7,30 +7,39 @@ from wtforms.validators import DataRequired, URL
 from flask_ckeditor import CKEditor, CKEditorField
 from datetime import date
 from bson import ObjectId
-import os
 import logging
-import sys
-import json_log_formatter
+import json
+import os
+
 # from prometheus_flask_exporter import PrometheusMetrics
 
 # # import metrics
-formatter = json_log_formatter.JSONFormatter()
 
-json_handler = logging.StreamHandler(sys.stdout)
-json_handler.setFormatter(formatter)
-
-logger = logging.getLogger('my_json')
-logger.addHandler(json_handler)
-logger.setLevel(logging.INFO)
 app = Flask(__name__)
 # PrometheusMetrics(app)
 # # metrics.info('app_info', 'Application info', version='1.0.3')
+
+# Initialize logger for the app
+handler = logging.StreamHandler()
+handler.setFormatter(JsonFormatter())
+app.logger.addHandler(handler)
+app.logger.setLevel(logging.INFO)
 
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 app.config['MONGO_URI'] = os.environ.get('MONGO_URI')  # Set your MongoDB URI
 mongo = PyMongo(app)
 Bootstrap(app)
 ckeditor = CKEditor(app)
+
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        log_record = {
+            "level": record.levelname,
+            "message": record.getMessage(),
+            "time": self.formatTime(record, self.datefmt)
+        }
+        return json.dumps(log_record)
+
 
 class CreatePostForm(FlaskForm):
     title = StringField("Blog Post Title", validators=[DataRequired()])
@@ -44,7 +53,7 @@ class CreatePostForm(FlaskForm):
 # @metrics.counter('invocation_by_type', 'Number of invocations by type',
 #          labels={'item_type': lambda: request.view_args['type']})
 def get_all_posts():
-    logger.info('Fetching all posts', extra={'path': '/'})
+    app.logger.info('Fetching all posts')
     posts = mongo.db.blog.find()
     return render_template("index.html", all_posts=posts)
     
