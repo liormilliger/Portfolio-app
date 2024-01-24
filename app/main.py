@@ -10,7 +10,8 @@ from bson import ObjectId
 import logging
 import json
 import os
-from prometheus_client import Counter, generate_latest
+from prometheus_client import Counter, generate_latest, Gauge
+import time
 
 app = Flask(__name__)
 
@@ -56,15 +57,18 @@ class CreatePostForm(FlaskForm):
     submit = SubmitField("Submit Post")
 
 total_requests = Counter('http_requests_total', 'Number of HTTP requests')
+request_duration = Gauge('request_duration_seconds', 'Time spent processing a request', ['endpoint'])
 
 @app.route('/')
-# @metrics.counter('invocation_by_type', 'Number of invocations by type',
-#          labels={'item_type': lambda: request.view_args['type']})
 def get_all_posts():
+    start_time = time.time()
     total_requests.inc()
     app.logger.info('Fetching all posts')
     posts = mongo.db.blog.find()
-    return render_template("index.html", all_posts=posts)
+    response = render_template("index.html", all_posts=posts)
+    request_duration.labels(endpoint='/').set(time.time() - start_time)
+    return response
+    # return render_template("index.html", all_posts=posts)
     
 def get_post(post_id):
     try:
@@ -139,41 +143,5 @@ def contact():
 def metrics():
     return generate_latest()
 
-# -----------------[ Metrics Start ]---------------------
-
-
-# # Custom Metrics
-# page_view_counter = metrics.counter(
-#     'page_views', 'Number of page views',
-#     labels={'endpoint': None}
-# )
-# unique_visitors_counter = metrics.counter(
-#     'unique_visitors', 'Number of unique visitors',
-#     labels={'visitor_id': None}
-# )
-# session_duration_summary = metrics.summary(
-#     'session_duration', 'Session duration',
-#     labels={'session_id': None}
-# )
-
-# # Example of incrementing page views in a route
-# @app.route('/view_blog/<blog_id>')
-# def view_blog(blog_id):
-#     # Increment the page view counter
-#     page_view_counter.labels(endpoint=request.path).inc()
-
-#     # Your existing logic to serve the blog post
-#     # ...
-
-#     return "Blog Content"
-
-# Initialize the metrics endpoint
-# metrics.register_default(
-#     metrics.counter(
-#         'by_path_counter', 'Request count by request paths',
-#         labels={'path': lambda: request.path}
-#     )
-# )
-# # -------------------[ Metrics End ] -------------------------
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
