@@ -12,7 +12,7 @@ itsdangerous
 Jinja2
 json-log-formatter
 MarkupSafe
-prometheus_flask_exporter
+prometheus_client
 pymongo
 urllib3
 visitor

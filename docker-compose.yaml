@@ -6,8 +6,8 @@ services:
     build:
       context: ./app
     command: 'sh -c "sleep 10s ; python main.py"'
-    # ports:
-    #   - "5000:5000"
+    ports:
+      - "5000:5000"
     depends_on:
       - mongo
     #     condition: service_healthy

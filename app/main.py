@@ -10,14 +10,9 @@ from bson import ObjectId
 import logging
 import json
 import os
-
-# from prometheus_flask_exporter import PrometheusMetrics
-
-# # import metrics
+from prometheus_client import Counter, generate_latest
 
 app = Flask(__name__)
-# PrometheusMetrics(app)
-# # metrics.info('app_info', 'Application info', version='1.0.3')
 
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 app.config['MONGO_URI'] = os.environ.get('MONGO_URI')  # Set your MongoDB URI
@@ -59,11 +54,14 @@ class CreatePostForm(FlaskForm):
     img_url = StringField("Blog Image URL", validators=[DataRequired(), URL()])
     body = CKEditorField("Blog Content", validators=[DataRequired()])
     submit = SubmitField("Submit Post")
-    
+
+total_requests = Counter('http_requests_total', 'Number of HTTP requests')
+
 @app.route('/')
 # @metrics.counter('invocation_by_type', 'Number of invocations by type',
 #          labels={'item_type': lambda: request.view_args['type']})
 def get_all_posts():
+    total_requests.inc()
     app.logger.info('Fetching all posts')
     posts = mongo.db.blog.find()
     return render_template("index.html", all_posts=posts)
@@ -136,6 +134,10 @@ def about():
 def contact():
     app.logger.info('Dont ever call me again')
     return render_template("contact.html")
+
+@app.route('/metrics')
+def metrics():
+    return generate_latest()
 
 # -----------------[ Metrics Start ]---------------------
 
