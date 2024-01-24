@@ -207,12 +207,12 @@ pipeline{
         always {
             cleanWs()
             
-            // script {
-            //     sh '''
-            //         docker rmi -f $(docker images -q)
-            //         docker rm volume -f $(docker volume ls -q)
-            //     '''
-            // }
+            script {
+                sh '''
+                    docker rmi -f $(docker images -q)
+                    docker volume rm -f $(docker volume ls -q)
+                '''
+            }
         }
     }
 }
