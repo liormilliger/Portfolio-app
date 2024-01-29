@@ -21,6 +21,7 @@ mongo = PyMongo(app)
 Bootstrap(app)
 ckeditor = CKEditor(app)
 
+# Logging in Json format
 class JsonFormatter(logging.Formatter):
     def format(self, record):
         log_record = {
