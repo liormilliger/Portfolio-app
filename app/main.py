@@ -41,6 +41,7 @@ class JsonFormatter(logging.Formatter):
 # Initialize logger for the app
 handler = logging.StreamHandler()
 handler.setFormatter(JsonFormatter())
+
 # Disable default Flask logging
 log = logging.getLogger('werkzeug')
 log.disabled = True
@@ -49,6 +50,7 @@ app.logger.handlers = []
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 
+#Creating Flask form for blog
 class CreatePostForm(FlaskForm):
     title = StringField("Blog Post Title", validators=[DataRequired()])
     subtitle = StringField("Subtitle", validators=[DataRequired()])
