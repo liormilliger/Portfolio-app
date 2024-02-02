@@ -51,7 +51,7 @@ and check `localhost` in the browser to get the app's UI
 
 ## 3-tier Microservices Application Architecture
 
-![app-arch](https://github.com/liormilliger/Portfolio-app/assets/64707466/a9032045-5ab6-45d3-bd7c-77d455ada1be)
+![app-arch (1)](https://github.com/liormilliger/Portfolio-app/assets/64707466/071a66ba-35e3-4e59-9640-ffcc52f020f2)
 
 
 ## Jenkinsfile
