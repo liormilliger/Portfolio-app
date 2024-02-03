@@ -2,12 +2,11 @@ version: '3.8'
 
 services:
   flask-app:
-    # image: 644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio:1.0.${BUILD_NUMBER}
     build:
       context: ./app
     command: 'sh -c "sleep 10s ; python main.py"'
-    ports:
-      - "5000:5000"
+    # ports:
+    # - "5000:5000"
     depends_on:
       - mongo
     #     condition: service_healthy
@@ -20,8 +19,8 @@ services:
   mongo:
     image: mongo:5.0
     restart: always
-    ports:
-      - "27017:27017"
+    # ports:
+    #   - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: passwrd
@@ -33,7 +32,7 @@ services:
     volumes:
       - ./init.js:/docker-entrypoint-initdb.d/init.js:ro
     networks:
-        - backend
+      - backend
   
   nginx:
     build:
@@ -51,4 +50,3 @@ networks:
     driver: bridge
   frontend:
     driver: bridge
-    # external: true ???
