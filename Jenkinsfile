@@ -1,14 +1,11 @@
 pipeline{
     
     agent any
-    // triggers {
-    //     pollSCM('* * * * *')
-    // }
+
     environment {
         ECR_USER = '644435390668.dkr.ecr.us-east-1.amazonaws.com'
         ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
         CONFIG_REPO = 'git@github.com:liormilliger/Portfolio-config.git'
-        // PUBLIC_KEY_CONTENT = credentials('liorm-portfolio-key.pem')
         IAM_ROLE = "liorm-portfolio-roles"
         GIT_SSH_KEY = "GitHub-key"
     }
@@ -20,7 +17,6 @@ pipeline{
     stages{
         stage ("Checkout") {
             steps {
-                // deleteDir()
                 checkout scm
             }
         }
@@ -30,9 +26,9 @@ pipeline{
                 sh """ cd app
                         docker build -t liorm-portfolio:${BUILD_NUMBER} .
                 """
-                // echo 'UNIT TEST (PyTest within Dockerfile)'
             }
         }
+        
         // stage ('App-Image Sanity Test') {
         //     steps{
         //         script{
@@ -98,13 +94,6 @@ pipeline{
             }
         }
 
-        // stage ('Containers Up!') {
-        //     steps{
-        //         sh "docker-compose up -d"
-        //     }
-        // }
-        
-        
         stage ( 'Update Config-Repo' ) {
             steps {
                 sshagent(["${GIT_SSH_KEY}"]) {
@@ -145,63 +134,19 @@ pipeline{
         }
     }
 
-    //     stage('get_commit_msg') {
-    //         steps {
-    //             script {
-    //                 env.GIT_COMMIT_MSG = sh (script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
-    //             }
-    //         }
-    //     }
 
-    //     stage('Clone Terraform Repo'){
-    //         when {
-    //             expression { return env.GIT_COMMIT_MSG.contains("#test") }
-    //         }
-            
-    //         steps {
-    //             script {
-    //                 sshagent(credentials: ['SSH-Key-for_GitLab']) {
-    //                     sh "git clone git@gitlab.com:liormilliger/terraform-modules.git"
-    //                 }
-    //             }
-    //         }
-    //     }
+        // stage('E2E Test') {
+        //     steps {
+        //         script {
+        //             sh """
+        //                 sleep 240
+        //                 curl http://${env.EC2_PUBLIC_IP}/api/search?q=music
 
-    //     stage('Terraform apply'){
-    //         steps {
-    //             script {
-    //                 dir("./terraform-modules"){
-    //                         sh """
-    //                             terraform init -migrate-state
-    //                             terraform workspace new ${params.DEVELOPER_NAME}-${BUILD_NUMBER}
-    //                             terraform destroy -auto-approve
-    //                             terraform apply -auto-approve
-    //                         """
-    //                         // // Capture the EC2 public IP from Terraform output
-    //                         // def initialec2PublicIp = sh(script: 'terraform output -json public_ips-1a', returnStdout: true).trim()
-                            
-    //                         // // Remove the first and last characters using regex
-    //                         // def ec2PublicIp = initialec2PublicIp.replaceAll(/^.\s*|\s*.$/, "")
-    //                         // // Export the EC2 public IP to a Jenkins environment variable
-    //                         // env.EC2_PUBLIC_IP = ec2PublicIp
-    //                         // // echo "EC2 Public IP: ${EC2_Public_IP}"
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     // stage('E2E Test') {
-    //     //     steps {
-    //     //         script {
-    //     //             sh """
-    //     //                 sleep 240
-    //     //                 curl http://${env.EC2_PUBLIC_IP}/api/search?q=music
-
-    //     //             """
-    //     //         }
-    //     //     }
-    //     // }
-    // }   
+        //             """
+        //         }
+        //     }
+        // }
+       
 
     post {
         always {
