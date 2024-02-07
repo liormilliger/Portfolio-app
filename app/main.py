@@ -91,7 +91,11 @@ def add_new_post():
     app.logger.info('New-post')
     form = CreatePostForm()
     if form.validate_on_submit():
+        # Find the highest current ID
+        highest_id_post = mongo.db.blog.find_one(sort=[("id", -1)])
+        new_id = 1 if not highest_id_post else highest_id_post['id'] + 1
         new_post = {
+            "id": new_id,
             "title": form.title.data,
             "subtitle": form.subtitle.data,
             "body": form.body.data,
