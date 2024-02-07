@@ -105,7 +105,7 @@ pipeline{
                         dir('config-repo') {
                             sh "ls -la"
                             String imageTag = "1.0.${BUILD_NUMBER}"
-                            sh "sed -i 's|${ECR_REPO_URL}:1.0.[0-9]*|${ECR_REPO_URL}:${imageTag}|' blog-app/templates/app-deployment.yaml"
+                            sh "sed -i 's|${ECR_REPO_URL}:1.0.[0-9]*|${ECR_REPO_URL}:${imageTag}|' blog-app/values.yaml"
                             
                            // Git commit and push
                             sh """
