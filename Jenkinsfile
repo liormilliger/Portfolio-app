@@ -28,23 +28,7 @@ pipeline{
                 """
             }
         }
-        
-        // stage ('App-Image Sanity Test') {
-        //     steps{
-        //         script{
-        //             sh """  docker compose up --build -d
-        //                 sleep 15
-        //                 responsecode1 = curl -fI http://3.94.61.106
-        //                 responsecode2 = curl -fI http://localhost:80
-        //                 responsecode3 = curl -fI http://10.0.3.87
-        //                 echo "from EC2 public ip:" responsecode1
-        //                 echo "from within Jenkins:" responsecode2
-        //                 echo "from EC2 private ip:" responsecode3
-        //                 docker compose down
-        //             """
-        //         }
-        //     }
-        // }
+
         
         stage ('Containers Up!') {
             steps{
