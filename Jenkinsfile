@@ -20,7 +20,9 @@ pipeline{
                 checkout scm
             }
         }
-
+// insert logic for new branch or main
+// for main - leave as is
+// for branch - image name includes {BRANCH_NAME}:{BUILD_NUMBER}
         stage ('Build App-Image') {
             steps {
                 sh """ cd app
@@ -62,7 +64,9 @@ pipeline{
                 echo 'docker-compoes up & API check'
             }
         }
-
+// Build logic for branch or main
+// if main - leave as is
+//if branch - push to Release-ECR
         stage('Push App image to ECR') {
             steps {
                 withCredentials([[
@@ -77,7 +81,7 @@ pipeline{
                     }
             }
         }
-
+// applies to main branch only
         stage ( 'Update Config-Repo' ) {
             steps {
                 sshagent(["${GIT_SSH_KEY}"]) {
