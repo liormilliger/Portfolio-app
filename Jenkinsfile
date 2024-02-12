@@ -68,6 +68,9 @@ pipeline{
 // if main - leave as is
 //if branch - push to Release-ECR
         stage('Push App image to ECR') {
+            when {
+                branch 'main'
+            }
             steps {
                 withCredentials([[
                     $class: 'AmazonWebServicesCredentialsBinding',
@@ -83,6 +86,9 @@ pipeline{
         }
 // applies to main branch only
         stage ( 'Update Config-Repo' ) {
+            when {
+                branch 'main'
+            }
             steps {
                 sshagent(["${GIT_SSH_KEY}"]) {
 
