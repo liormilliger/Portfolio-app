@@ -1,15 +1,12 @@
 version: '3.8'
 
 services:
+  
   flask-app:
     build:
       context: ./app
-    command: 'sh -c "sleep 10s ; python main.py"'
-    # ports:
-    # - "5000:5000"
     depends_on:
       - mongo
-    #     condition: service_healthy
     environment:
       MONGO_URI: "mongodb://root:passwrd@mongo:27017/blog?authSource=admin"
     networks:
@@ -19,24 +16,18 @@ services:
   mongo:
     image: mongo:5.0
     restart: always
-    # ports:
-    #   - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: passwrd
-    # healthcheck:
-    #   test: ["CMD", "mongosh", "--eval", "db.stats()"]
-    #   interval: 10s
-    #   timeout: 5s
-    #   retries: 3
     volumes:
       - ./init.js:/docker-entrypoint-initdb.d/init.js:ro
     networks:
       - backend
   
   nginx:
-    build:
-      context: .
+    image: nginx:latest
+    volumes:
+      - ./app/static:/usr/share/nginx/html:ro
     ports:
       - "80:80"
     networks:
