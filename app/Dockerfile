@@ -6,7 +6,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./static /app/static
 COPY ./templates /app/templates
-
+COPY main.py .
 EXPOSE 5000
 
 ENV FLASK_APP=main.py
