@@ -27,16 +27,12 @@ pipeline{
                 """
             }
         }
-       
-        stage ('Containers Up!') {
-            steps{
-                sh "docker-compose up -d"
-            }
-        }
 
         stage("Test"){
             steps{
-                echo "========executing Test=========="
+                echo "========CONTAINERS UP=========="
+                sh "docker-compose up -d"
+                echo "========EXECUTING TESTS=========="
                 script{
                     sh """#!/bin/bash
                             for ((i=1; i<=5; i++)); do
@@ -103,7 +99,7 @@ pipeline{
             }
         }
     }
-    
+
     post {
         always {
         
