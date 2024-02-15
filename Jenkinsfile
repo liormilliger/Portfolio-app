@@ -27,8 +27,7 @@ pipeline{
                 """
             }
         }
-
-        
+       
         stage ('Containers Up!') {
             steps{
                 sh "docker-compose up -d"
@@ -55,12 +54,7 @@ pipeline{
                 }
             }
         }
-        stage ('E2E Tests') {
-            steps {
-                echo 'SOME TESTS TO CHECK ALL IS UP AND READY'
-                echo 'docker-compoes up & API check'
-            }
-        }
+
         stage('Push App image to ECR') {
             when {
                 branch 'main'
@@ -108,11 +102,10 @@ pipeline{
                 }    
             }
         }
-    }
-    
+
     post {
         always {
-            cleanWs()
+        
             
             script {
                 sh '''
@@ -121,6 +114,8 @@ pipeline{
                     docker volume rm -f $(docker volume ls -q)
                 '''
             }
+
+            cleanWs()
         }
     }
 }

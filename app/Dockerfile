@@ -9,8 +9,5 @@ COPY ./templates /app/templates
 COPY main.py .
 EXPOSE 5000
 
-ENV FLASK_APP=main.py
-ENV FLASK_RUN_HOST=0.0.0.0
-
 # Run main.py when the container launches
 CMD ["python", "main.py"]
