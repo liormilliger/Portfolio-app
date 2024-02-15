@@ -72,6 +72,7 @@ pipeline{
                     }
             }
         }
+    }
 // applies to main branch only
         stage ( 'Update Config-Repo' ) {
             when {
