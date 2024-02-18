@@ -72,6 +72,8 @@ pipeline{
                     credentialsId: 'AWS Credentials'
                 ]]) {
                         script {
+                            def versionType = getVersionType()
+                            def version = getVersion(versionType)
                             sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_USER}"
                             sh "docker tag liorm-portfolio:${BUILD_NUMBER} ${ECR_REPO_URL}:${version}"
                             sh "docker push ${ECR_REPO_URL}:${version}"
@@ -88,6 +90,8 @@ pipeline{
                 sshagent(["${GIT_SSH_KEY}"]) {
 
                     script {
+                        def versionType = getVersionType()
+                        def version = getVersion(versionType)
                         // Clone the configuration repository
                         sh "git clone ${CONFIG_REPO} config-repo"
 
@@ -125,55 +129,52 @@ pipeline{
             cleanWs()
         }
     }
-
-    script {
-    // Function to determine version type based on branch name
-        def getVersionType() {
-            def branchName = env.BRANCH_NAME
-            if (branchName.startsWith('feature/')) {
-                return 'minor' // Feature branch increments minor version
-            } else if (branchName.startsWith('release/')) {
-                return 'major' // Release branch increments major version
-            } else {
-                return 'patch' // Default to patch version
-            }
-        }
-
-        // Function to get the next version based on version type
-        def getVersion(versionType) {
-            def currentVersion = readVersionFromFile('TAG')
-            def parts = currentVersion.tokenize('.')
-            switch (versionType) {
-                case 'major':
-                    parts[0] = parts[0].toInteger() + 1
-                    parts[1] = 0 // Reset minor version
-                    parts[2] = 0 // Reset patch version
-                    break
-                case 'minor':
-                    parts[1] = parts[1].toInteger() + 1
-                    parts[2] = 0 // Reset patch version
-                    break
-                case 'patch':
-                    parts[2] = parts[2].toInteger() + 1
-                    break
-                default:
-                    // Default to patch version
-                    parts[2] = parts[2].toInteger() + 1
-                    break
-            }
-            return parts.join('.')
-        }
-
-        // Function to read current version from file
-        def readVersionFromFile() {
-            def versionFile = readFile('TAG').trim()
-            return versionFile
-        }
-
-        // Function to update version file with new version
-        def updateVersionFile(version) {
-            def versionFilePath = 'TAG'
-            writeFile file: versionFilePath, text: version
-        }
+}
+// Function to determine version type based on branch name
+def getVersionType() {
+    def branchName = env.BRANCH_NAME
+    if (branchName.startsWith('feature/')) {
+        return 'minor' // Feature branch increments minor version
+    } else if (branchName.startsWith('release/')) {
+        return 'major' // Release branch increments major version
+    } else {
+        return 'patch' // Default to patch version
     }
+}
+
+// Function to get the next version based on version type
+def getVersion(versionType) {
+    def currentVersion = readVersionFromFile('TAG')
+    def parts = currentVersion.tokenize('.')
+    switch (versionType) {
+        case 'major':
+            parts[0] = parts[0].toInteger() + 1
+            parts[1] = 0 // Reset minor version
+            parts[2] = 0 // Reset patch version
+            break
+        case 'minor':
+            parts[1] = parts[1].toInteger() + 1
+            parts[2] = 0 // Reset patch version
+            break
+        case 'patch':
+            parts[2] = parts[2].toInteger() + 1
+            break
+        default:
+            // Default to patch version
+            parts[2] = parts[2].toInteger() + 1
+            break
+    }
+    return parts.join('.')
+}
+
+// Function to read current version from file
+def readVersionFromFile() {
+    def versionFile = readFile('TAG').trim()
+    return versionFile
+}
+
+// Function to update version file with new version
+def updateVersionFile(version) {
+    def versionFilePath = 'TAG'
+    writeFile file: versionFilePath, text: version
 }
