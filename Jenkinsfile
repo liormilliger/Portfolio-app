@@ -46,7 +46,7 @@ def getVersion(versionType) {
 
 // Function to update version file with new version
 def updateVersionFile(version) {
-    def versionFilePath = 'TAG'
+    def versionFilePath = './TAG'
     writeFile file: versionFilePath, text: version
 }
 
