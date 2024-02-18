@@ -58,6 +58,7 @@ pipeline{
         ECR_USER = '644435390668.dkr.ecr.us-east-1.amazonaws.com'
         ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
         CONFIG_REPO = 'git@github.com:liormilliger/Portfolio-config.git'
+        APP_REPO = 'git@github.com:liormilliger/Portfolio-app.git'
         GIT_SSH_KEY = "GitHub-key"
     }
     options {
@@ -118,15 +119,22 @@ pipeline{
                 }
                 // PUSH and UPDATE Portfolio-app Repo TAG file
                 sshagent(["${GIT_SSH_KEY}"]) {
-                    // Git commit and push
-                    sh """
-                        git config user.email "jenkins@example.com"
-                        git config user.name "Jenkins"
-                        git checkout ${BRANCH_NAME}
-                        git add TAG
-                        git commit -m "Versioning changed TAG file from BUILD ${BUILD_NUMBER} BRANCH ${BRANCH_NAME} Kind Regards, the moustache on the man - Jenkins"
-                        git push origin ${BRANCH_NAME}
-                    """
+                    script {
+                        // Clone the configuration repository
+                        sh "git clone ${APP_REPO} app-repo"
+
+                        dir('app-repo') {
+                            // Git commit and push
+                            sh """
+                                git config user.email "jenkins@example.com"
+                                git config user.name "Jenkins"
+                                git checkout ${BRANCH_NAME}
+                                git add TAG
+                                git commit -m "Versioning changed TAG file from BUILD ${BUILD_NUMBER} BRANCH ${BRANCH_NAME} Kind Regards, the moustache on the man - Jenkins"
+                                git push origin ${BRANCH_NAME}
+                            """
+                        }
+                    }
                 }
             }
         }
