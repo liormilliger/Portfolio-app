@@ -115,6 +115,7 @@ pipeline{
                         echo ${version}
                         cat TAG
                     """
+                    // PUSH and UPDATE Portfolio-app Repo TAG file
                 }
             }
         }
