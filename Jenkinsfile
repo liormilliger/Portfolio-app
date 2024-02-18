@@ -122,9 +122,10 @@ pipeline{
                     sh """
                         git config user.email "jenkins@example.com"
                         git config user.name "Jenkins"
+                        git checkout ${BRANCH_NAME}
                         git add TAG
                         git commit -m "Versioning changed TAG file from BUILD ${BUILD_NUMBER} BRANCH ${BRANCH_NAME} Kind Regards, the moustache on the man - Jenkins"
-                        git push
+                        git push origin ${BRANCH_NAME}
                     """
                 }
             }
