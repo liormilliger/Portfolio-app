@@ -72,14 +72,14 @@ pipeline{
             }
         }
 
-        stage ('Build App-Image') {
-            steps {
-                    sh """ 
-                        cd app
-                        docker build -t liorm-portfolio:${BUILD_NUMBER} .
-                    """
-            }
-        }
+        // stage ('Build App-Image') {
+        //     steps {
+        //             sh """ 
+        //                 cd app
+        //                 docker build -t liorm-portfolio:${BUILD_NUMBER} .
+        //             """
+        //     }
+        // }
 
         // stage("Test"){
         //     steps{
@@ -110,6 +110,10 @@ pipeline{
                     versionType = getVersionType()
                     version = getVersion(versionType)
                     updateVersionFile(version)
+                    sh """
+                        echo ${versionType}
+                        echo ${version}
+                    """
                 }
             }
         }
@@ -166,19 +170,19 @@ pipeline{
         }
     }
 
-    post {
-        always {
+    // post {
+    //     always {
         
             
-            script {
-                sh '''
-                    docker-compose down
-                    docker rmi -f $(docker images -q)
-                    docker volume rm -f $(docker volume ls -q)
-                '''
-            }
+    //         script {
+    //             sh '''
+    //                 docker-compose down
+    //                 docker rmi -f $(docker images -q)
+    //                 docker volume rm -f $(docker volume ls -q)
+    //             '''
+    //         }
 
-            // cleanWs()
-        }
-    }
+    //         cleanWs()
+    //     }
+    // }
 }
