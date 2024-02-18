@@ -54,7 +54,13 @@ pipeline{
         }
 
         stage('Versioning') {
-
+            steps {
+                script {
+                    def versionType = getVersionType()
+                    def version = getVersion(versionType)
+                    updateVersionFile(version)
+                }
+            }
         }
 
         stage('Push App image to ECR') {
@@ -68,8 +74,8 @@ pipeline{
                 ]]) {
                         script {
                             sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_USER}"
-                            sh "docker tag liorm-portfolio:${BUILD_NUMBER} ${ECR_REPO_URL}:1.0.${BUILD_NUMBER}"
-                            sh "docker push ${ECR_REPO_URL}:1.0.${BUILD_NUMBER}"
+                            sh "docker tag liorm-portfolio:${BUILD_NUMBER} ${ECR_REPO_URL}:${version}"
+                            sh "docker push ${ECR_REPO_URL}:${version}"
                         }
                     }
             }
@@ -87,8 +93,8 @@ pipeline{
                         sh "git clone ${CONFIG_REPO} config-repo"
 
                         dir('config-repo') {
-                            String imageTag = "1.0.${BUILD_NUMBER}"
-                            sh "sed -i 's|${ECR_REPO_URL}:1.0.[0-9]*|${ECR_REPO_URL}:${imageTag}|' blog-app/values.yaml"
+                            String imageTag = "${version}"
+                            sh "sed -i 's|${ECR_REPO_URL}:[0-9]*.[0-9]*.[0-9]*|${ECR_REPO_URL}:${imageTag}|' blog-app/values.yaml"
                             
                            // Git commit and push
                             sh """
@@ -137,7 +143,7 @@ def getVersionType() {
 
 // Function to get the next version based on version type
 def getVersion(versionType) {
-    def currentVersion = readVersionFromFile()
+    def currentVersion = readVersionFromFile(TAG)
     def parts = currentVersion.tokenize('.')
     switch (versionType) {
         case 'major':
@@ -162,10 +168,12 @@ def getVersion(versionType) {
 
 // Function to read current version from file
 def readVersionFromFile() {
-    // Implement reading version from file
+    def versionFile = readFile('TAG').trim()
+    return versionFile
 }
 
 // Function to update version file with new version
 def updateVersionFile(version) {
-    // Implement updating version file
+    def versionFilePath = 'TAG'
+    writeFile file: versionFilePath, text: version
 }
