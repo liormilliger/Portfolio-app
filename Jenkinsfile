@@ -36,7 +36,7 @@ pipeline{
                 echo "========EXECUTING TESTS=========="
                 script{
                     sh """#!/bin/bash
-                            for ((i=1; i<=5; i++)); do
+                            for ((i=1; i<=10; i++)); do
                                 responseCode=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost:80)
                                     
                                 if [[ \${responseCode} == '200' ]]; then

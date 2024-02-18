@@ -25,9 +25,8 @@ services:
       - backend
   
   nginx:
-    image: nginx:latest
-    volumes:
-      - ./app/static:/usr/share/nginx/html:ro
+    build:
+      context: .
     ports:
       - "80:80"
     networks:
