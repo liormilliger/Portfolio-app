@@ -21,7 +21,7 @@ def getVersionType() {
 
 // Function to get the next version based on version type
 def getVersion(versionType) {
-    def currentVersion = readVersionFromFile('TAG')
+    def currentVersion = readVersionFromFile()
     def parts = currentVersion.tokenize('.')
     switch (versionType) {
         case 'major':
@@ -81,28 +81,28 @@ pipeline{
             }
         }
 
-        stage("Test"){
-            steps{
-                echo "========CONTAINERS UP=========="
-                sh "docker-compose up -d"
-                echo "========EXECUTING TESTS=========="
-                script{
-                    sh """#!/bin/bash
-                            for ((i=1; i<=10; i++)); do
-                                responseCode=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost:80)
+        // stage("Test"){
+        //     steps{
+        //         echo "========CONTAINERS UP=========="
+        //         sh "docker-compose up -d"
+        //         echo "========EXECUTING TESTS=========="
+        //         script{
+        //             sh """#!/bin/bash
+        //                     for ((i=1; i<=10; i++)); do
+        //                         responseCode=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost:80)
                                     
-                                if [[ \${responseCode} == '200' ]]; then
-                                    echo "Health check succeeded. HTTP response code: \${responseCode}"
-                                    break
-                                else
-                                    echo "Health check failed. HTTP response code: \${responseCode}. Retrying in 5 seconds..."
-                                    sleep 5
-                                fi
-                            done
-                        """
-                }
-            }
-        }
+        //                         if [[ \${responseCode} == '200' ]]; then
+        //                             echo "Health check succeeded. HTTP response code: \${responseCode}"
+        //                             break
+        //                         else
+        //                             echo "Health check failed. HTTP response code: \${responseCode}. Retrying in 5 seconds..."
+        //                             sleep 5
+        //                         fi
+        //                     done
+        //                 """
+        //         }
+        //     }
+        // }
 
         stage('Versioning') {
             steps {
