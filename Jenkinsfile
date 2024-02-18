@@ -130,6 +130,13 @@ pipeline{
         }
     }
 }
+
+// Function to read current version from file
+def readVersionFromFile() {
+    def versionFile = readFile('TAG').trim()
+    return versionFile
+}
+
 // Function to determine version type based on branch name
 def getVersionType() {
     def branchName = env.BRANCH_NAME
@@ -165,12 +172,6 @@ def getVersion(versionType) {
             break
     }
     return parts.join('.')
-}
-
-// Function to read current version from file
-def readVersionFromFile() {
-    def versionFile = readFile('TAG').trim()
-    return versionFile
 }
 
 // Function to update version file with new version
