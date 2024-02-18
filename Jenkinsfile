@@ -22,11 +22,10 @@ pipeline{
 
         stage ('Build App-Image') {
             steps {
-                scripts {
-                    dir('app'){
-                        sh """ docker build -t liorm-portfolio:${BUILD_NUMBER} ."""
-                    }
-                }
+                    sh """ 
+                        cd app
+                        docker build -t liorm-portfolio:${BUILD_NUMBER} .
+                    """
             }
         }
 
