@@ -178,7 +178,7 @@ pipeline{
                 '''
             }
 
-            cleanWs()
+            // cleanWs()
         }
     }
 }
