@@ -3,7 +3,7 @@ def version
 
 // Function to read current version from file
 def readVersionFromFile() {
-    def versionFile = readFile('TAG').trim()
+    def versionFile = readFile('version.txt').trim()
     return versionFile
 }
 
@@ -46,7 +46,7 @@ def getVersion(versionType) {
 
 // Function to update version file with new version
 def updateVersionFile(version) {
-    def versionFilePath = './TAG'
+    def versionFilePath = './version.txt'
     writeFile file: versionFilePath, text: version
 }
 
@@ -114,7 +114,7 @@ pipeline{
                     sh """
                         echo ${versionType}
                         echo ${version}
-                        cat TAG
+                        cat version.txt
                     """
                 }
             }
