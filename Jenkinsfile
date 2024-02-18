@@ -142,7 +142,7 @@ def getVersionType() {
 
 // Function to get the next version based on version type
 def getVersion(versionType) {
-    def currentVersion = readVersionFromFile(TAG)
+    def currentVersion = readVersionFromFile('TAG')
     def parts = currentVersion.tokenize('.')
     switch (versionType) {
         case 'major':
