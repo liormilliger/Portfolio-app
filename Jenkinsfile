@@ -22,9 +22,11 @@ pipeline{
 
         stage ('Build App-Image') {
             steps {
-                sh """ cd app
-                        docker build -t liorm-portfolio:${BUILD_NUMBER} .
-                """
+                scripts {
+                    dir('app'){
+                        sh """ docker build -t liorm-portfolio:${BUILD_NUMBER} ."""
+                    }
+                }
             }
         }
 
@@ -49,6 +51,10 @@ pipeline{
                         """
                 }
             }
+        }
+
+        stage('Versioning') {
+
         }
 
         stage('Push App image to ECR') {
@@ -81,7 +87,6 @@ pipeline{
                         sh "git clone ${CONFIG_REPO} config-repo"
 
                         dir('config-repo') {
-                            sh "ls -la"
                             String imageTag = "1.0.${BUILD_NUMBER}"
                             sh "sed -i 's|${ECR_REPO_URL}:1.0.[0-9]*|${ECR_REPO_URL}:${imageTag}|' blog-app/values.yaml"
                             
@@ -115,4 +120,52 @@ pipeline{
             cleanWs()
         }
     }
+}
+
+
+// Function to determine version type based on branch name
+def getVersionType() {
+    def branchName = env.BRANCH_NAME
+    if (branchName.startsWith('feature/')) {
+        return 'minor' // Feature branch increments minor version
+    } else if (branchName.startsWith('release/')) {
+        return 'major' // Release branch increments major version
+    } else {
+        return 'patch' // Default to patch version
+    }
+}
+
+// Function to get the next version based on version type
+def getVersion(versionType) {
+    def currentVersion = readVersionFromFile()
+    def parts = currentVersion.tokenize('.')
+    switch (versionType) {
+        case 'major':
+            parts[0] = parts[0].toInteger() + 1
+            parts[1] = 0 // Reset minor version
+            parts[2] = 0 // Reset patch version
+            break
+        case 'minor':
+            parts[1] = parts[1].toInteger() + 1
+            parts[2] = 0 // Reset patch version
+            break
+        case 'patch':
+            parts[2] = parts[2].toInteger() + 1
+            break
+        default:
+            // Default to patch version
+            parts[2] = parts[2].toInteger() + 1
+            break
+    }
+    return parts.join('.')
+}
+
+// Function to read current version from file
+def readVersionFromFile() {
+    // Implement reading version from file
+}
+
+// Function to update version file with new version
+def updateVersionFile(version) {
+    // Implement updating version file
 }
