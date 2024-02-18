@@ -113,6 +113,7 @@ pipeline{
                     sh """
                         echo ${versionType}
                         echo ${version}
+                        cat TAG
                     """
                 }
             }
