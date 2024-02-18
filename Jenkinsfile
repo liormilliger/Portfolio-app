@@ -107,8 +107,8 @@ pipeline{
         stage('Versioning') {
             steps {
                 script {
-                    def versionType = getVersionType()
-                    def version = getVersion(versionType)
+                    versionType = getVersionType()
+                    version = getVersion(versionType)
                     updateVersionFile(version)
                 }
             }
