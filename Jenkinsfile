@@ -115,7 +115,17 @@ pipeline{
                         echo ${version}
                         cat TAG
                     """
-                    // PUSH and UPDATE Portfolio-app Repo TAG file
+                }
+                // PUSH and UPDATE Portfolio-app Repo TAG file
+                sshagent(["${GIT_SSH_KEY}"]) {
+                    // Git commit and push
+                    sh """
+                        git config user.email "jenkins@example.com"
+                        git config user.name "Jenkins"
+                        git add TAG
+                        git commit -m "Versioning changed TAG file from BUILD ${BUILD_NAME} BRANCH ${BRANCH_NAME} Kind Regards, the moustache on the man - Jenkins"
+                        git push origin ${BRANCH_NAME}
+                    """
                 }
             }
         }
