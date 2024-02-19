@@ -21,6 +21,7 @@ pipeline {
         ECR_USER = '644435390668.dkr.ecr.us-east-1.amazonaws.com'
         ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
         CONFIG_REPO = 'git@github.com:liormilliger/Portfolio-config.git'
+        CONFIG_REPO_DIR = 'Portfolio-config'
         APP_REPO = 'git@github.com:liormilliger/Portfolio-app.git'
         GIT_SSH_KEY = "GitHub-key"
     }
@@ -249,7 +250,7 @@ pipeline {
                             // Clone the configuration repository
                             sh "git clone ${CONFIG_REPO}"
 
-                            dir("Portfolio-config") {
+                            dir(CONFIG_REPO_DIR) {
 
                             // Git commit and push
                                 sh """
@@ -264,7 +265,7 @@ pipeline {
                 }
                 stage('Change Deployment Image') {
                     steps {
-                        dir("Portfolio-config/blog-app") {
+                        dir("${CONFIG_REPO_DIR}/blog-app") {
                             sh """
                                 yq -i \'.blogapp.appImage = \"${REMOTE_IMG_TAG}\"\' values.yaml
                             """
@@ -284,7 +285,7 @@ pipeline {
 
                     steps {
                         sshagent(credentials: ["${GIT_SSH_KEY}"]) {
-                            dir("Portfolio-config") {
+                            dir(CONFIG_REPO_DIR) {
                                 sh """
                                     git add .
                                     git commit -m 'Jenkins Deploy - Build No. ${BUILD_NUMBER}, Version ${CALCULATED_VERSION}'
