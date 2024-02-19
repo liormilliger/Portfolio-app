@@ -249,7 +249,7 @@ pipeline {
                             // Clone the configuration repository
                             sh "git clone ${CONFIG_REPO}"
 
-                            dir("${CONFIG_REPO}") {
+                            dir("Portfolio-config") {
 
                             // Git commit and push
                                 sh """
