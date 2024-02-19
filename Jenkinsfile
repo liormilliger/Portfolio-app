@@ -212,7 +212,7 @@ pipeline {
                         docker rmi ${LOCAL_IMG_TAG}
                         docker rmi "${REMOTE_IMG_TAG}"
                         docker rmi "${REMOTE_IMG_LTS_TAG}"
-                        docker logout ${REMOTE_REGISTRY}
+                        docker logout ${ECR_REPO_URL}
                     """
                 }
             }
