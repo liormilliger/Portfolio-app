@@ -18,6 +18,7 @@ pipeline {
     agent any
 
     environment {
+        // Define environment variables
         ECR_USER = '644435390668.dkr.ecr.us-east-1.amazonaws.com'
         ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
         CONFIG_REPO = 'git@github.com:liormilliger/Portfolio-config.git'
@@ -27,25 +28,26 @@ pipeline {
     }
 
     options {
-        timestamps()
-        timeout(time: 10, unit: 'MINUTES')    
+        timestamps() // Add timestamps to the console output
+        timeout(time: 10, unit: 'MINUTES') // Set a timeout for the pipeline execution    
     }
 
+    // Checkout source code from the repository
     stages{
-
         stage ("Checkout") {
             steps {
                 checkout scm
             }
         }
-
+        
+        // Calculate version based on tags and release version
         stage('Version calculation') {
             steps {
                 script {
                     sshagent(credentials: ["${GIT_SSH_KEY}"]) {
                         def releaseVersion = sh(script: 'cat version.txt', returnStdout: true).trim()
 
-                        // Get all tags
+                        // Get all tags from the repository
                         sh 'git fetch --tags'
                         def tags = sh(script: 'git tag -l --merge | sort -r -V', returnStdout: true).trim()
 
@@ -53,7 +55,7 @@ pipeline {
                         def calculatedVersion = ''
 
                         if (latestTag) {
-                            /* groovylint-disable-next-line UnusedVariable */
+                            // Increment patch version if a tag exists
                             def (major, minor, patch) = latestTag.tokenize('.')
                             patch = patch.toInteger() + 1
                             calculatedVersion = "${releaseVersion}.${patch}"
@@ -70,6 +72,7 @@ pipeline {
         stage('Environment variable configuration') {
             steps {
                 script {
+                    // Configure environment variables for Docker image tags
                     REMOTE_IMG_TAG = "${ECR_REPO_URL}:${CALCULATED_VERSION}"
                     REMOTE_IMG_LTS_TAG = "${ECR_REPO_URL}:latest"
                     LOCAL_IMG_TAG = "blogapp:${CALCULATED_VERSION}"
@@ -80,6 +83,7 @@ pipeline {
         stage ('Build App-Image') {
             steps {
                 dir('app') {
+                    // Build Docker image for the application
                     sh """ 
                         docker build -t ${LOCAL_IMG_TAG} .
                     """
@@ -91,12 +95,14 @@ pipeline {
             stages {
                 stage ("Containers UP") {
                     steps {
+                        // Start Docker containers
                         echo "========CONTAINERS UP=========="
                         sh "docker-compose up -d"
                     }
                 }
                 stage ("Test") {
                     steps {
+                        // Execute tests against the application
                         echo "========EXECUTING TESTS=========="
 
                         script{
@@ -120,6 +126,7 @@ pipeline {
 
             post {
                 always {
+                    // Shut down Docker containers after testing
                     sh """
                         docker compose down -v
                     """
@@ -130,6 +137,7 @@ pipeline {
         stage('Publish Images') {
 
             when {
+                // Publish images only for specific branches
                 anyOf {
                     branch 'main'
                     expression {
@@ -141,6 +149,7 @@ pipeline {
             stages {
                 stage("Tag Images") {
                     steps {
+                        // Tag Docker images with calculated version
                         echo 'Tagging Images'
 
                         sh """
@@ -152,6 +161,7 @@ pipeline {
 
                 stage("Push Images") {
                     steps {
+                        // Push Docker images to ECR registry
                         echo 'Pushing Images to Registry'
                         script {
                             sh """
@@ -160,12 +170,12 @@ pipeline {
                                 docker push ${REMOTE_IMG_LTS_TAG}
                                 """
                         }
-                        // }
                     }
                 }
 
                 stage('Git Tag & Clean') {
                     steps {
+                        // Tag the Git repository and push changes
                         sshagent(credentials: ["${GIT_SSH_KEY}"]) {
                             sh """
                                 git clean -f
@@ -180,6 +190,7 @@ pipeline {
 
             post {
                 always {
+                    // Clean up Docker images and logout from ECR
                     sh """
                         docker rmi ${LOCAL_IMG_TAG}
                         docker rmi "${REMOTE_IMG_TAG}"
@@ -192,6 +203,7 @@ pipeline {
 
         stage ("Update Config-Repo") {
             when {
+                // Update configuration repository for specific branches
                 anyOf {
                     branch 'main'
                     expression {
@@ -226,6 +238,7 @@ pipeline {
                 stage('Change Deployment Image') {
                     steps {
                         dir("${CONFIG_REPO_DIR}/blog-app") {
+                            // Update deployment image in configuration
                             sh """
                                 yq -i \'.blogapp.appImage = \"${REMOTE_IMG_TAG}\"\' values.yaml
                             """
@@ -246,6 +259,7 @@ pipeline {
                     steps {
                         sshagent(credentials: ["${GIT_SSH_KEY}"]) {
                             dir(CONFIG_REPO_DIR) {
+                                // Push changes to the configuration repository
                                 sh """
                                     git add .
                                     git commit -m 'Jenkins Deploy - Build No. ${BUILD_NUMBER}, Version ${CALCULATED_VERSION}'
@@ -269,6 +283,7 @@ pipeline {
         always {
 
             cleanWs()
+            // Clean up unused Docker resources
             sh '''
                 docker image prune -af
                 docker volume prune -af
