@@ -79,10 +79,11 @@ pipeline {
 
         stage ('Build App-Image') {
             steps {
+                dir('app') {
                     sh """ 
-                        cd app
                         docker build -t ${LOCAL_IMG_TAG} .
                     """
+                }            
             }
         }
 
