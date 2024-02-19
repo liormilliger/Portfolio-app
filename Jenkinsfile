@@ -1,56 +1,19 @@
-def versionType
-def version
+def findLatestTag(tags, releaseVersion) {
+    def tagArray = tags.split('\n')
+    def latestTag = null
 
-// Function to read current version from file
-def readVersionFromFile() {
-    def versionFile = readFile('version.txt').trim()
-    return versionFile
-}
-
-// Function to determine version type based on branch name
-def getVersionType() {
-    def branchName = env.BRANCH_NAME
-    if (branchName.startsWith('feature/')) {
-        return 'minor' // Feature branch increments minor version
-    } else if (branchName.startsWith('release/')) {
-        return 'major' // Release branch increments major version
-    } else {
-        return 'patch' // Default to patch version
+    // Iterate through the tags to find a tag starting with releaseVersion
+    for (tag in tagArray) {
+        if (tag.startsWith(releaseVersion)) {
+            latestTag = tag
+            break
+        }
     }
+
+    return latestTag // returns latestTag variable
 }
 
-// Function to get the next version based on version type
-def getVersion(versionType) {
-    def currentVersion = readVersionFromFile()
-    def parts = currentVersion.tokenize('.')
-    switch (versionType) {
-        case 'major':
-            parts[0] = parts[0].toInteger() + 1
-            parts[1] = 0 // Reset minor version
-            parts[2] = 0 // Reset patch version
-            break
-        case 'minor':
-            parts[1] = parts[1].toInteger() + 1
-            parts[2] = 0 // Reset patch version
-            break
-        case 'patch':
-            parts[2] = parts[2].toInteger() + 1
-            break
-        default:
-            // Default to patch version
-            parts[2] = parts[2].toInteger() + 1
-            break
-    }
-    return parts.join('.')
-}
-
-// Function to update version file with new version
-def updateVersionFile(version) {
-    def versionFilePath = './version.txt'
-    writeFile file: versionFilePath, text: version
-}
-
-pipeline{
+pipeline {
     
     agent any
 
@@ -67,124 +30,285 @@ pipeline{
     }
 
     stages{
+
         stage ("Checkout") {
             steps {
                 checkout scm
             }
         }
 
-        // stage ('Build App-Image') {
-        //     steps {
-        //             sh """ 
-        //                 cd app
-        //                 docker build -t liorm-portfolio:${BUILD_NUMBER} .
-        //             """
-        //     }
-        // }
-
-        // stage("Test"){
-        //     steps{
-        //         echo "========CONTAINERS UP=========="
-        //         sh "docker-compose up -d"
-        //         echo "========EXECUTING TESTS=========="
-        //         script{
-        //             sh """#!/bin/bash
-        //                     for ((i=1; i<=10; i++)); do
-        //                         responseCode=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost:80)
-                                    
-        //                         if [[ \${responseCode} == '200' ]]; then
-        //                             echo "Health check succeeded. HTTP response code: \${responseCode}"
-        //                             break
-        //                         else
-        //                             echo "Health check failed. HTTP response code: \${responseCode}. Retrying in 5 seconds..."
-        //                             sleep 5
-        //                         fi
-        //                     done
-        //                 """
-        //         }
-        //     }
-        // }
-
-        stage('Versioning') {
+        stage('Version calculation') {
             steps {
                 script {
-                    versionType = getVersionType()
-                    version = getVersion(versionType)
-                    updateVersionFile(version)
+                    sshagent(credentials: ["${GIT_SSH_KEY}"]) {
+                        def releaseVersion = sh(script: 'cat version.txt', returnStdout: true).trim()
+
+                        // Get all tags
+                        sh 'git fetch --tags'
+                        def tags = sh(script: 'git tag -l --merge | sort -r -V', returnStdout: true).trim()
+
+                        def latestTag = findLatestTag(tags, releaseVersion)
+                        def calculatedVersion = ''
+
+                        if (latestTag) {
+                            /* groovylint-disable-next-line UnusedVariable */
+                            def (major, minor, patch) = latestTag.tokenize('.')
+                            patch = patch.toInteger() + 1
+                            calculatedVersion = "${releaseVersion}.${patch}"
+                        } else {
+                            calculatedVersion = "${releaseVersion}.0"
+                        }
+
+                        env.LATEST_TAG = latestTag
+                        env.RELEASE_VERSION = releaseVersion
+                        env.CALCULATED_VERSION = calculatedVersion
+                    }
+                }
+            }
+        }
+
+        stage('Environment variable configuration') {
+            steps {
+                script {
+                    // main
+                    def remoteRegistry = "${ECR_REPO_URL}"
+
+                    // // devops
+                    // if (BRANCH_NAME =~ /^devops.*/) {
+                    //     remoteRegistry = '644435390668.dkr.ecr.eu-central-1.amazonaws.com/taskit-test'
+                    // }
+
+                    // Remote
+                    REMOTE_REGISTRY = "${remoteRegistry}"
+                    REMOTE_IMG_TAG = "${REMOTE_REGISTRY}:${CALCULATED_VERSION}"
+                    REMOTE_IMG_LTS_TAG = "${REMOTE_REGISTRY}:latest"
+
+                    // Local
+                    LOCAL_IMG_TAG = "localhost/taskit:${CALCULATED_VERSION}"
+                    TEST_NET = "taskit-nginx-net-${CALCULATED_VERSION}"
+                }
+            }
+        }
+
+        stage('Debug') {
+            steps {
+                echo '---------------DEBUG----------------------'
+
+                echo "LATEST_TAG: ${LATEST_TAG}"
+                echo "RELEASE_VERSION: ${RELEASE_VERSION}"
+                echo "CALCULATED_VERSION: ${CALCULATED_VERSION}"
+                echo "REMOTE_REGISTRY: ${REMOTE_REGISTRY}"
+                echo "REMOTE_IMG_TAG: ${REMOTE_IMG_TAG}"
+                echo "REMOTE_IMG_LTS_TAG: ${REMOTE_IMG_LTS_TAG}"
+                echo "LOCAL_IMG_TAG: ${LOCAL_IMG_TAG}"
+                echo "TEST_NET: ${TEST_NET}"
+
+                echo '---------------DEBUG----------------------'
+            }
+        }
+
+
+        stage ('Build App-Image') {
+            steps {
+                    sh """ 
+                        cd app
+                        docker build -t ${LOCAL_IMG_TAG} .
+                    """
+            }
+        }
+
+        stage("Test"){
+            stages {
+                stage ("Containers UP") {
+                    steps {
+                        echo "========CONTAINERS UP=========="
+                        sh "docker-compose up -d"
+                    }
+                }
+                stage ("Test") {
+                    steps {
+                        echo "========EXECUTING TESTS=========="
+
+                        script{
+                            sh """#!/bin/bash
+                                for ((i=1; i<=10; i++)); do
+                                    responseCode=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost:80)
+                                            
+                                    if [[ \${responseCode} == '200' ]]; then
+                                        echo "Health check succeeded. HTTP response code: \${responseCode}"
+                                        break
+                                    else
+                                        echo "Health check failed. HTTP response code: \${responseCode}. Retrying in 5 seconds..."
+                                        sleep 5
+                                    fi
+                                done
+                            """
+                        }
+                    }
+                }
+            }
+
+            post {
+                always {
                     sh """
-                        echo ${versionType}
-                        echo ${version}
-                        cat version.txt
+                        docker compose down -v
                     """
                 }
             }
         }
 
-        stage('Push App image to ECR') {
+        stage('Publish Images') {
             when {
+                // anyOf {
+                //     branch 'main'
+                //     expression {
+                //         return BRANCH_NAME.startsWith('devops')
+                //     }
+                // }
                 branch 'main'
             }
-            steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'AWS Credentials'
-                ]]) {
-                        script {
-                            versionType = getVersionType()
-                            version = getVersion(versionType)
-                            sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_USER}"
-                            sh "docker tag liorm-portfolio:${BUILD_NUMBER} ${ECR_REPO_URL}:${version}"
-                            sh "docker push ${ECR_REPO_URL}:${version}"
+
+            stages {
+                stage("Tag Images") {
+                    steps {
+                        echo 'Tagging Images'
+
+                        sh """
+                            docker tag ${LOCAL_IMG_TAG} ${REMOTE_IMG_TAG}
+                            docker tag ${LOCAL_IMG_TAG} ${REMOTE_IMG_LTS_TAG}
+                        """
+                    }
+                }
+
+                stage("Push Images") {
+                    steps {
+                        echo 'Pushing Images to Registry'
+                        // DO I Reallly need withCredentials??????
+                        withCredentials([[
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'AWS Credentials'
+                        ]]) {
+                            script {
+                                sh """
+                                    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_USER}
+                                    docker push ${REMOTE_IMG_TAG}
+                                    docker push ${REMOTE_IMG_LTS_TAG}
+                                    """
+                            }
                         }
                     }
-            }
-        }
-// applies to main branch only
-        stage ( 'Update Config-Repo' ) {
-            when {
-                branch 'main'
-            }
-            steps {
-                sshagent(["${GIT_SSH_KEY}"]) {
+                }
 
-                    script {
-                        versionType = getVersionType()
-                        version = getVersion(versionType)
-                        // Clone the configuration repository
-                        sh "git clone ${CONFIG_REPO} config-repo"
-
-                        dir('config-repo') {
-                            String imageTag = "${version}"
-                            sh "sed -i 's|${ECR_REPO_URL}:[0-9]*.[0-9]*.[0-9]*|${ECR_REPO_URL}:${imageTag}|' blog-app/values.yaml"
-                            
-                           // Git commit and push
+                stage('Git Tag & Clean') {
+                    steps {
+                        sshagent(credentials: ["${GIT_SSH_KEY}"]) {
+                            // is it necessary to have both clean and reset?????
                             sh """
-                                git config user.email "jenkins@example.com"
-                                git config user.name "Jenkins"
-                                git add blog-app/values.yaml
-                                git commit -m "Update image to ${imageTag} with love, Jenkins"
-                                git push origin main
+                                git clean -f
+                                git reset --hard
+                                git tag ${CALCULATED_VERSION}
+                                git push origin ${CALCULATED_VERSION}
                             """
                         }
                     }
-                }    
+                }
+            }
+
+            post {
+                always {
+                    sh """
+                        docker rmi ${LOCAL_IMG_TAG}
+                        docker rmi "${REMOTE_IMG_TAG}"
+                        docker rmi "${REMOTE_IMG_LTS_TAG}"
+                        docker logout ${REMOTE_REGISTRY}
+                    """
+                }
+            }
+        }
+
+
+
+// applies to main branch only
+        
+        stage ("Update Config-Repo") {
+            when {
+                anyOf {
+                    branch 'main'
+                    // expression {
+                    //     return BRANCH_NAME.startsWith('devops')
+                    // }                    
+                }
+            }
+
+            stages {
+                stage("Clone Config-Repo"){
+                    steps {
+                        cleanWs()
+
+                        sshagent(["${GIT_SSH_KEY}"]) {
+
+                            // Clone the configuration repository
+                            sh "git clone ${CONFIG_REPO} config-repo"
+
+                            dir('config-repo') {
+
+                            // Git commit and push
+                                sh """
+                                    git checkout main
+                                    git config user.email "jenkins@example.com"
+                                    git config user.name "Jenkins"
+
+                                """
+                            }
+                        }
+                    }
+                }
+                stage('Change Deployment Image') {
+                    steps {
+                        dir("${CONFIG_REPO}/blog-app") {
+                            sh """
+                                yq -yi \'.blogapp.appImage = \"${REMOTE_IMG_TAG}\"\' values.yaml
+                            """
+                        }
+                    }
+                }
+
+                stage('Push Changes') {
+                    when {
+                        branch 'main'
+                    }
+
+                    steps {
+                        sshagent(credentials: ["${GITOPS_REPO_CRED_ID}"]) {
+                            dir(GITOPS_REPO_NAME) {
+                                sh """
+                                    git add .
+                                    git commit -m 'Jenkins Deploy - Build No. ${BUILD_NUMBER}, Version ${CALCULATED_VERSION}'
+                                    git push origin main
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+
+            post {
+                always {
+                    cleanWs()
+                }
             }
         }
     }
 
     post {
         always {
-        
-            
-    //         script {
-    //             sh '''
-    //                 docker-compose down
-    //                 docker rmi -f $(docker images -q)
-    //                 docker volume rm -f $(docker volume ls -q)
-    //             '''
-    //         }
-
             cleanWs()
+            sh '''
+                docker image prune -af
+                docker volume prune -af
+                docker container prune -f
+                docker network prune -f
+            '''
         }
     }
-}
+}    
