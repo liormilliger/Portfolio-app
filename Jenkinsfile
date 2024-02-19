@@ -153,11 +153,6 @@ pipeline {
                 stage("Push Images") {
                     steps {
                         echo 'Pushing Images to Registry'
-                        // // DO I Reallly need withCredentials??????
-                        // withCredentials([[
-                        //     $class: 'AmazonWebServicesCredentialsBinding',
-                        //     credentialsId: 'AWS Credentials'
-                        // ]]) {
                         script {
                             sh """
                                 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_USER}
@@ -272,6 +267,19 @@ pipeline {
 
     post {
         always {
+
+            success {
+                emailext subject: "Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: "Build URL: ${env.BUILD_URL}",
+                    to: "liormdevops@gmail.com"
+            }
+            
+            failure {
+                emailext subject: "Build Failure: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                        body: "Build URL: ${env.BUILD_URL}",
+                        to: "liormdevops@gmail.com"
+            }
+
             cleanWs()
             sh '''
                 docker image prune -af
@@ -281,19 +289,4 @@ pipeline {
             '''
         }
     }
-
-    post {
-        success {
-            emailext subject: "Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: "Build URL: ${env.BUILD_URL}",
-                    to: "liormdevops@gmail.com"
-        }
-        
-        failure {
-            emailext subject: "Build Failure: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: "Build URL: ${env.BUILD_URL}",
-                    to: "liormdevops@gmail.com"
-        }
-    }
-
 }    
