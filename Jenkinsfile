@@ -266,7 +266,7 @@ pipeline {
                     steps {
                         dir("${CONFIG_REPO}/blog-app") {
                             sh """
-                                yq -yi \'.blogapp.appImage = \"${REMOTE_IMG_TAG}\"\' values.yaml
+                                yq -i \'.blogapp.appImage = \"${REMOTE_IMG_TAG}\"\' values.yaml
                             """
                         }
                     }
