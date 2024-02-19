@@ -61,8 +61,6 @@ pipeline {
                             calculatedVersion = "${releaseVersion}.0"
                         }
 
-                        // env.LATEST_TAG = latestTag
-                        // env.RELEASE_VERSION = releaseVersion
                         env.CALCULATED_VERSION = calculatedVersion
                     }
                 }
@@ -72,34 +70,12 @@ pipeline {
         stage('Environment variable configuration') {
             steps {
                 script {
-
                     REMOTE_IMG_TAG = "${ECR_REPO_URL}:${CALCULATED_VERSION}"
                     REMOTE_IMG_LTS_TAG = "${ECR_REPO_URL}:latest"
-
-                    // Local
                     LOCAL_IMG_TAG = "blogapp:${CALCULATED_VERSION}"
-                    // TEST_NET = "taskit-nginx-net-${CALCULATED_VERSION}"
                 }
             }
         }
-
-        stage('Debug') {
-            steps {
-                echo '---------------DEBUG----------------------'
-
-                // echo "LATEST_TAG: ${LATEST_TAG}"
-                // echo "RELEASE_VERSION: ${RELEASE_VERSION}"
-                echo "CALCULATED_VERSION: ${CALCULATED_VERSION}"
-                echo "REMOTE_REGISTRY: ${ECR_REPO_URL}"
-                echo "REMOTE_IMG_TAG: ${REMOTE_IMG_TAG}"
-                echo "REMOTE_IMG_LTS_TAG: ${REMOTE_IMG_LTS_TAG}"
-                echo "LOCAL_IMG_TAG: ${LOCAL_IMG_TAG}"
-                // echo "TEST_NET: ${TEST_NET}"
-
-                echo '---------------DEBUG----------------------'
-            }
-        }
-
 
         stage ('Build App-Image') {
             steps {
@@ -151,11 +127,12 @@ pipeline {
         }
 
         stage('Publish Images') {
+
             when {
                 anyOf {
                     branch 'main'
                     expression {
-                        return BRANCH_NAME.startsWith('jenkins-vers')
+                        return BRANCH_NAME.startsWith('dev')
                     }
                 }
             }
@@ -175,26 +152,25 @@ pipeline {
                 stage("Push Images") {
                     steps {
                         echo 'Pushing Images to Registry'
-                        // DO I Reallly need withCredentials??????
-                        withCredentials([[
-                            $class: 'AmazonWebServicesCredentialsBinding',
-                            credentialsId: 'AWS Credentials'
-                        ]]) {
-                            script {
-                                sh """
-                                    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_USER}
-                                    docker push ${REMOTE_IMG_TAG}
-                                    docker push ${REMOTE_IMG_LTS_TAG}
-                                    """
-                            }
+                        // // DO I Reallly need withCredentials??????
+                        // withCredentials([[
+                        //     $class: 'AmazonWebServicesCredentialsBinding',
+                        //     credentialsId: 'AWS Credentials'
+                        // ]]) {
+                        script {
+                            sh """
+                                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_USER}
+                                docker push ${REMOTE_IMG_TAG}
+                                docker push ${REMOTE_IMG_LTS_TAG}
+                                """
                         }
+                        // }
                     }
                 }
 
                 stage('Git Tag & Clean') {
                     steps {
                         sshagent(credentials: ["${GIT_SSH_KEY}"]) {
-                            // is it necessary to have both clean and reset?????
                             sh """
                                 git clean -f
                                 git reset --hard
@@ -218,16 +194,12 @@ pipeline {
             }
         }
 
-
-
-// applies to main branch only
-        
         stage ("Update Config-Repo") {
             when {
                 anyOf {
                     branch 'main'
                     expression {
-                        return BRANCH_NAME.startsWith('jenkins-vers')
+                        return BRANCH_NAME.startsWith('dev')
                     }                    
                 }
             }
