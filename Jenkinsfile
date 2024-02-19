@@ -268,18 +268,6 @@ pipeline {
     post {
         always {
 
-            success {
-                emailext subject: "Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: "Build URL: ${env.BUILD_URL}",
-                    to: "liormdevops@gmail.com"
-            }
-            
-            failure {
-                emailext subject: "Build Failure: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                        body: "Build URL: ${env.BUILD_URL}",
-                        to: "liormdevops@gmail.com"
-            }
-
             cleanWs()
             sh '''
                 docker image prune -af
