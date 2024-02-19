@@ -75,6 +75,10 @@ pipeline {
 
                     REMOTE_IMG_TAG = "${ECR_REPO_URL}:${CALCULATED_VERSION}"
                     REMOTE_IMG_LTS_TAG = "${ECR_REPO_URL}:latest"
+
+                    // Local
+                    LOCAL_IMG_TAG = "blogapp:${CALCULATED_VERSION}"
+                    // TEST_NET = "taskit-nginx-net-${CALCULATED_VERSION}"
                 }
             }
         }
@@ -90,6 +94,7 @@ pipeline {
                 echo "REMOTE_IMG_TAG: ${REMOTE_IMG_TAG}"
                 echo "REMOTE_IMG_LTS_TAG: ${REMOTE_IMG_LTS_TAG}"
                 echo "LOCAL_IMG_TAG: ${LOCAL_IMG_TAG}"
+                // echo "TEST_NET: ${TEST_NET}"
 
                 echo '---------------DEBUG----------------------'
             }
