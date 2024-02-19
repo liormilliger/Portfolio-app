@@ -25,6 +25,7 @@ pipeline {
         APP_REPO = 'git@github.com:liormilliger/Portfolio-app.git'
         GIT_SSH_KEY = "GitHub-key"
     }
+
     options {
         timestamps()
         timeout(time: 10, unit: 'MINUTES')    
@@ -60,8 +61,8 @@ pipeline {
                             calculatedVersion = "${releaseVersion}.0"
                         }
 
-                        env.LATEST_TAG = latestTag
-                        env.RELEASE_VERSION = releaseVersion
+                        // env.LATEST_TAG = latestTag
+                        // env.RELEASE_VERSION = releaseVersion
                         env.CALCULATED_VERSION = calculatedVersion
                     }
                 }
@@ -71,22 +72,9 @@ pipeline {
         stage('Environment variable configuration') {
             steps {
                 script {
-                    // main
-                    def remoteRegistry = "${ECR_REPO_URL}"
 
-                    // // devops
-                    // if (BRANCH_NAME =~ /^devops.*/) {
-                    //     remoteRegistry = '644435390668.dkr.ecr.eu-central-1.amazonaws.com/taskit-test'
-                    // }
-
-                    // Remote
-                    REMOTE_REGISTRY = "${remoteRegistry}"
-                    REMOTE_IMG_TAG = "${REMOTE_REGISTRY}:${CALCULATED_VERSION}"
-                    REMOTE_IMG_LTS_TAG = "${REMOTE_REGISTRY}:latest"
-
-                    // Local
-                    LOCAL_IMG_TAG = "localhost/taskit:${CALCULATED_VERSION}"
-                    TEST_NET = "taskit-nginx-net-${CALCULATED_VERSION}"
+                    REMOTE_IMG_TAG = "${ECR_REPO_URL}:${CALCULATED_VERSION}"
+                    REMOTE_IMG_LTS_TAG = "${ECR_REPO_URL}:latest"
                 }
             }
         }
@@ -95,14 +83,13 @@ pipeline {
             steps {
                 echo '---------------DEBUG----------------------'
 
-                echo "LATEST_TAG: ${LATEST_TAG}"
-                echo "RELEASE_VERSION: ${RELEASE_VERSION}"
+                // echo "LATEST_TAG: ${LATEST_TAG}"
+                // echo "RELEASE_VERSION: ${RELEASE_VERSION}"
                 echo "CALCULATED_VERSION: ${CALCULATED_VERSION}"
-                echo "REMOTE_REGISTRY: ${REMOTE_REGISTRY}"
+                echo "REMOTE_REGISTRY: ${ECR_REPO_URL}"
                 echo "REMOTE_IMG_TAG: ${REMOTE_IMG_TAG}"
                 echo "REMOTE_IMG_LTS_TAG: ${REMOTE_IMG_LTS_TAG}"
                 echo "LOCAL_IMG_TAG: ${LOCAL_IMG_TAG}"
-                echo "TEST_NET: ${TEST_NET}"
 
                 echo '---------------DEBUG----------------------'
             }
