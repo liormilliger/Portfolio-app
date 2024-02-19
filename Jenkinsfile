@@ -264,7 +264,7 @@ pipeline {
                 }
                 stage('Change Deployment Image') {
                     steps {
-                        dir("${CONFIG_REPO}/blog-app") {
+                        dir("Portfolio-config/blog-app") {
                             sh """
                                 yq -i \'.blogapp.appImage = \"${REMOTE_IMG_TAG}\"\' values.yaml
                             """
