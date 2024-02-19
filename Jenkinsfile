@@ -274,7 +274,12 @@ pipeline {
 
                 stage('Push Changes') {
                     when {
-                        branch 'main'
+                        anyOf {
+                            branch 'main'
+                            expression {
+                                return BRANCH_NAME.startsWith('jenkins-vers')
+                            }                    
+                        }
                     }
 
                     steps {
