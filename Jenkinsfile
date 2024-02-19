@@ -278,8 +278,8 @@ pipeline {
                     }
 
                     steps {
-                        sshagent(credentials: ["${GITOPS_REPO_CRED_ID}"]) {
-                            dir(GITOPS_REPO_NAME) {
+                        sshagent(credentials: ["${GIT_SSH_KEY}"]) {
+                            dir("Portfolio-config") {
                                 sh """
                                     git add .
                                     git commit -m 'Jenkins Deploy - Build No. ${BUILD_NUMBER}, Version ${CALCULATED_VERSION}'
@@ -291,17 +291,17 @@ pipeline {
                 }
             }
 
-            // post {
-            //     always {
-            //         cleanWs()
-            //     }
-            // }
+            post {
+                always {
+                    cleanWs()
+                }
+            }
         }
     }
 
     post {
         always {
-            // cleanWs()
+            cleanWs()
             sh '''
                 docker image prune -af
                 docker volume prune -af
