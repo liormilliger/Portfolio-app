@@ -291,17 +291,17 @@ pipeline {
                 }
             }
 
-            post {
-                always {
-                    cleanWs()
-                }
-            }
+            // post {
+            //     always {
+            //         cleanWs()
+            //     }
+            // }
         }
     }
 
     post {
         always {
-            cleanWs()
+            // cleanWs()
             sh '''
                 docker image prune -af
                 docker volume prune -af
