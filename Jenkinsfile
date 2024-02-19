@@ -159,13 +159,12 @@ pipeline {
 
         stage('Publish Images') {
             when {
-                // anyOf {
-                //     branch 'main'
-                //     expression {
-                //         return BRANCH_NAME.startsWith('devops')
-                //     }
-                // }
-                branch 'main'
+                anyOf {
+                    branch 'main'
+                    expression {
+                        return BRANCH_NAME.startsWith('jenkins-vers')
+                    }
+                }
             }
 
             stages {
@@ -234,9 +233,9 @@ pipeline {
             when {
                 anyOf {
                     branch 'main'
-                    // expression {
-                    //     return BRANCH_NAME.startsWith('devops')
-                    // }                    
+                    expression {
+                        return BRANCH_NAME.startsWith('jenkins-vers')
+                    }                    
                 }
             }
 
