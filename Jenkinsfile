@@ -247,9 +247,9 @@ pipeline {
                         sshagent(["${GIT_SSH_KEY}"]) {
 
                             // Clone the configuration repository
-                            sh "git clone ${CONFIG_REPO} config-repo"
+                            sh "git clone ${CONFIG_REPO}"
 
-                            dir('config-repo') {
+                            dir(${CONFIG_REPO}) {
 
                             // Git commit and push
                                 sh """
