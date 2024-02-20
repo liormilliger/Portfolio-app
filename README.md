@@ -25,8 +25,8 @@ To Deploy the whole infrastructure, change to Portfolio-infra and perform `terra
 ## Full Deployment Workflow Chart
 
 
+![App-workflow-latest (2)](https://github.com/liormilliger/Portfolio-app/assets/64707466/a1d6b346-a446-4f9c-bcaa-f37377bf2a9d)
 
-![App-workflow-latest (1)](https://github.com/liormilliger/Portfolio-app/assets/64707466/adac4211-e244-48ab-9130-570513cc9f0e)
 
 ## Prerequisites
 
