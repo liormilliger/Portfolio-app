@@ -25,10 +25,10 @@ To Deploy the whole infrastructure, change to Portfolio-infra and perform `terra
 ## Full Deployment Workflow Chart
 
 
-![App-workflow-latest (2)](https://github.com/liormilliger/Portfolio-app/assets/64707466/a1d6b346-a446-4f9c-bcaa-f37377bf2a9d)
 
 
-## Prerequisites
+## Prerequisites![App-workflow-latest-fix](https://github.com/liormilliger/Portfolio-app/assets/64707466/2293a66a-fe00-436f-866e-3b638cec04fc)
+
 
 Before you begin, ensure you have the following:
 - Docker and docker-compose installed
