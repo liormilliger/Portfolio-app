@@ -92,17 +92,15 @@ pipeline {
         //     }
         // }
 
-        stage("Test"){
-            stages {
-                stage ("Containers UP") {
-                    withCredentials([file(credentialsId: 'Mongo-Secrets', variable: 'MONGO_URI', 'MONGO_INITDB_ROOT_USERNAME', 'MONGO_INITDB_ROOT_PASSWORD')]){
-                        steps {
-                            // Start Docker containers
-                            echo "${MONGO_URI}, ${MONGO_INITDB_ROOT_USERNAME}, ${MONGO_INITDB_ROOT_PASSWORD}"
-                            // echo "========CONTAINERS UP=========="
-                            // sh "docker-compose up -d"
-                        }
-                    }
+        // stage("Test"){
+        //     stages {
+        stage ("Containers UP") {
+            withCredentials([file(credentialsId: 'Mongo-Secrets', variable: 'MONGO_URI', 'MONGO_INITDB_ROOT_USERNAME', 'MONGO_INITDB_ROOT_PASSWORD')]){
+                steps {
+                    // Start Docker containers
+                    echo "${MONGO_URI}, ${MONGO_INITDB_ROOT_USERNAME}, ${MONGO_INITDB_ROOT_PASSWORD}"
+                    // echo "========CONTAINERS UP=========="
+                    // sh "docker-compose up -d"
                 }
             }
         }
