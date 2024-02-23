@@ -136,7 +136,7 @@ pipeline {
                 always {
                     // Shut down Docker containers after testing
                     sh """
-                        docker compose down -v
+                        docker-compose down -v
                     """
                 }
             }
