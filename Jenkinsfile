@@ -102,7 +102,8 @@ pipeline {
                 withCredentials([file(credentialsId: 'Mongo-Secrets')]){
 
                     // Start Docker containers
-                    echo "${MONGO_URI}, ${MONGO_INITDB_ROOT_USERNAME}, ${MONGO_INITDB_ROOT_PASSWORD}"
+                    // echo "${MONGO_URI}, ${MONGO_INITDB_ROOT_USERNAME}, ${MONGO_INITDB_ROOT_PASSWORD}"
+                    echo "${Mongo-Secrets}"
                     // echo "========CONTAINERS UP=========="
                     // sh "docker-compose up -d"
                 }
