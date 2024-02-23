@@ -95,8 +95,9 @@ pipeline {
         // stage("Test"){
         //     stages {
         stage ("Containers UP") {
-            withCredentials([file(credentialsId: 'Mongo-Secrets', variable: 'MONGO_URI', 'MONGO_INITDB_ROOT_USERNAME', 'MONGO_INITDB_ROOT_PASSWORD')]){
-                steps {
+            steps {
+                withCredentials([file(credentialsId: 'Mongo-Secrets', variable: 'MONGO_URI', 'MONGO_INITDB_ROOT_USERNAME', 'MONGO_INITDB_ROOT_PASSWORD')]){
+
                     // Start Docker containers
                     echo "${MONGO_URI}, ${MONGO_INITDB_ROOT_USERNAME}, ${MONGO_INITDB_ROOT_PASSWORD}"
                     // echo "========CONTAINERS UP=========="
