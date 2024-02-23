@@ -1,18 +1,3 @@
-def findLatestTag(tags, releaseVersion) {
-    def tagArray = tags.split('\n')
-    def latestTag = null
-
-    // Iterate through the tags to find a tag starting with releaseVersion
-    for (tag in tagArray) {
-        if (tag.startsWith(releaseVersion)) {
-            latestTag = tag
-            break
-        }
-    }
-
-    return latestTag // returns latestTag variable
-}
-
 pipeline {
     
     agent any
@@ -28,7 +13,6 @@ pipeline {
         MONGO_URI = credentials('MONGO_URI')
         MONGO_INITDB_ROOT_USERNAME = credentials('MONGO_INITDB_ROOT_USERNAME')
         MONGO_INITDB_ROOT_PASSWORD = credentials('MONGO_INITDB_ROOT_PASSWORD')
-        MONGO_DB_CREDS = "Mongo-Secrets"
     }
 
     options {
@@ -296,4 +280,19 @@ pipeline {
             '''
         }
     }
-}    
+}
+
+def findLatestTag(tags, releaseVersion) {
+    def tagArray = tags.split('\n')
+    def latestTag = null
+
+    // Iterate through the tags to find a tag starting with releaseVersion
+    for (tag in tagArray) {
+        if (tag.startsWith(releaseVersion)) {
+            latestTag = tag
+            break
+        }
+    }
+
+    return latestTag // returns latestTag variable
+}
