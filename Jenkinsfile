@@ -99,7 +99,7 @@ pipeline {
         //     stages {
         stage ("Containers UP") {
             steps {
-                withCredentials([file(credentialsId: 'Mongo-Secrets' variable: 'lalaland')]){
+                withCredentials([file(credentialsId: 'Mongo-Secrets', variable: 'lalaland')]){
                     sh "cat $lalaland"
                     sh('cat $lalaland')
                     // Start Docker containers
