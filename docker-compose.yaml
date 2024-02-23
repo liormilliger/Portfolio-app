@@ -8,7 +8,7 @@ services:
     depends_on:
       - mongo
     environment:
-      MONGO_URI: "mongodb://root:passwrd@mongo:27017/blog?authSource=admin"
+      MONGO_URI: "${MONGO_URI}"
     networks:
       - backend
       - frontend
@@ -17,18 +17,20 @@ services:
     image: mongo:5.0
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: passwrd
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD}"
     volumes:
       - ./init.js:/docker-entrypoint-initdb.d/init.js:ro
     networks:
       - backend
   
   nginx:
-    build:
-      context: .
+    image: nginx:latest
     ports:
       - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./app/static/:/usr/share/nginx/html:ro
     networks:
       - frontend
     depends_on:

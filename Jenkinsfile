@@ -25,6 +25,10 @@ pipeline {
         CONFIG_REPO_DIR = 'Portfolio-config'
         APP_REPO = 'git@github.com:liormilliger/Portfolio-app.git'
         GIT_SSH_KEY = "GitHub-key"
+        MONGO_URI = credentials('MONGO_URI')
+        MONGO_INITDB_ROOT_USERNAME = credentials('MONGO_INITDB_ROOT_USERNAME')
+        MONGO_INITDB_ROOT_PASSWORD = credentials('MONGO_INITDB_ROOT_PASSWORD')
+        MONGO_DB_CREDS = "Mongo-Secrets"
     }
 
     options {
@@ -95,9 +99,9 @@ pipeline {
             stages {
                 stage ("Containers UP") {
                     steps {
-                        // Start Docker containers
-                        echo "========CONTAINERS UP=========="
-                        sh "docker-compose up -d"
+                            echo "========CONTAINERS UP=========="
+                            sh "docker-compose up -d"
+                        // }
                     }
                 }
                 stage ("Test") {
@@ -128,7 +132,7 @@ pipeline {
                 always {
                     // Shut down Docker containers after testing
                     sh """
-                        docker compose down -v
+                        docker-compose down -v
                     """
                 }
             }
