@@ -95,54 +95,52 @@ pipeline {
         //     }
         // }
 
-        // stage("Test"){
-        //     stages {
-        stage ("Containers UP") {
-            steps {
-                // withCredentials([file(credentialsId: 'Mongo-Secrets', variable: 'lalaland')]){
-                    // Start Docker containers
-                    echo "${MONGO_URI}, ${MONGO_INITDB_ROOT_USERNAME}, ${MONGO_INITDB_ROOT_PASSWORD}"
-                    // echo "${Mongo-Secrets}"
-                    // echo "========CONTAINERS UP=========="
-                    // sh "docker-compose up -d"
-                // }
+        stage("Test"){
+            stages {
+                stage ("Containers UP") {
+                    steps {
+                        // withCredentials([file(credentialsId: 'Mongo-Secrets', variable: 'lalaland')]){
+                            // Start Docker containers
+                            // echo "${MONGO_URI}, ${MONGO_INITDB_ROOT_USERNAME}, ${MONGO_INITDB_ROOT_PASSWORD}"
+                            // echo "${Mongo-Secrets}"
+                            // echo "========CONTAINERS UP=========="
+                            sh "docker-compose up -d"
+                        // }
+                    }
+                }
+                stage ("Test") {
+                    steps {
+                        // Execute tests against the application
+                        echo "========EXECUTING TESTS=========="
+
+                        script{
+                            sh """#!/bin/bash
+                                for ((i=1; i<=10; i++)); do
+                                    responseCode=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost:80)
+                                            
+                                    if [[ \${responseCode} == '200' ]]; then
+                                        echo "Health check succeeded. HTTP response code: \${responseCode}"
+                                        break
+                                    else
+                                        echo "Health check failed. HTTP response code: \${responseCode}. Retrying in 5 seconds..."
+                                        sleep 5
+                                    fi
+                                done
+                            """
+                        }
+                    }
+                }
+            }
+
+            post {
+                always {
+                    // Shut down Docker containers after testing
+                    sh """
+                        docker compose down -v
+                    """
+                }
             }
         }
-    }
-}
-//                 stage ("Test") {
-//                     steps {
-//                         // Execute tests against the application
-//                         echo "========EXECUTING TESTS=========="
-
-//                         script{
-//                             sh """#!/bin/bash
-//                                 for ((i=1; i<=10; i++)); do
-//                                     responseCode=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost:80)
-                                            
-//                                     if [[ \${responseCode} == '200' ]]; then
-//                                         echo "Health check succeeded. HTTP response code: \${responseCode}"
-//                                         break
-//                                     else
-//                                         echo "Health check failed. HTTP response code: \${responseCode}. Retrying in 5 seconds..."
-//                                         sleep 5
-//                                     fi
-//                                 done
-//                             """
-//                         }
-//                     }
-//                 }
-//             }
-
-//             post {
-//                 always {
-//                     // Shut down Docker containers after testing
-//                     sh """
-//                         docker compose down -v
-//                     """
-//                 }
-//             }
-//         }
 
 //         stage('Publish Images') {
 
@@ -287,7 +285,7 @@ pipeline {
 //                 }
 //             }
 //         }
-//     }
+    }
 
 //     post {
 //         always {
@@ -301,5 +299,5 @@ pipeline {
 //                 docker network prune -f
 //             '''
 //         }
-//     }
-// }    
+    // }
+}    
