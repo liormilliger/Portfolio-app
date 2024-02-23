@@ -105,7 +105,7 @@ pipeline {
                     echo "${MONGO_URI}, ${MONGO_INITDB_ROOT_USERNAME}, ${MONGO_INITDB_ROOT_PASSWORD}"
                     // echo "========CONTAINERS UP=========="
                     // sh "docker-compose up -d"
-                // }
+                }
             }
         }
     }
