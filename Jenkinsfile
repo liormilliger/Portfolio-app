@@ -25,9 +25,9 @@ pipeline {
         CONFIG_REPO_DIR = 'Portfolio-config'
         APP_REPO = 'git@github.com:liormilliger/Portfolio-app.git'
         GIT_SSH_KEY = "GitHub-key"
-        MONGO_URI = "MONGO_URI"
-        MONGO_INITDB_ROOT_USERNAME = "MONGO_INITDB_ROOT_USERNAME"
-        MONGO_INITDB_ROOT_PASSWORD = "MONGO_INITDB_ROOT_PASSWORD"
+        MONGO_URI = credentials('MONGO_URI')
+        MONGO_INITDB_ROOT_USERNAME = credentials('MONGO_INITDB_ROOT_USERNAME')
+        MONGO_INITDB_ROOT_PASSWORD = credentials('MONGO_INITDB_ROOT_PASSWORD')
         MONGO_DB_CREDS = "Mongo-Secrets"
     }
 
@@ -99,13 +99,13 @@ pipeline {
         //     stages {
         stage ("Containers UP") {
             steps {
-                withCredentials([file(credentialsId: 'Mongo-Secrets', variable: 'lalaland')]){
+                // withCredentials([file(credentialsId: 'Mongo-Secrets', variable: 'lalaland')]){
                     // Start Docker containers
                     echo "${MONGO_URI}, ${MONGO_INITDB_ROOT_USERNAME}, ${MONGO_INITDB_ROOT_PASSWORD}"
                     // echo "${Mongo-Secrets}"
                     // echo "========CONTAINERS UP=========="
                     // sh "docker-compose up -d"
-                }
+                // }
             }
         }
     }
