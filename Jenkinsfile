@@ -64,7 +64,17 @@ pipeline {
                     REMOTE_IMG_TAG = "${ECR_REPO_URL}:${CALCULATED_VERSION}"
                     REMOTE_IMG_LTS_TAG = "${ECR_REPO_URL}:latest"
                     LOCAL_IMG_TAG = "blogapp:${CALCULATED_VERSION}"
+                    NGINX_IMG_TAG = "nginx-static-files"
                 }
+            }
+        }
+
+        stage ('Build Nginx Image') {
+            steps {
+                    // Build Docker image for the application
+                    sh """ 
+                        docker build -t ${NGINX_IMG_TAG} .
+                    """
             }
         }
 
@@ -143,6 +153,7 @@ pipeline {
                         sh """
                             docker tag ${LOCAL_IMG_TAG} ${REMOTE_IMG_TAG}
                             docker tag ${LOCAL_IMG_TAG} ${REMOTE_IMG_LTS_TAG}
+                            docker tag ${NGINX_IMG_TAG} ${NGINX_IMG_TAG}:latest
                         """
                     }
                 }
@@ -156,6 +167,7 @@ pipeline {
                                 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_USER}
                                 docker push ${REMOTE_IMG_TAG}
                                 docker push ${REMOTE_IMG_LTS_TAG}
+                                docker push ${NGINX_IMG_TAG}:latest
                                 """
                         }
                     }
@@ -250,7 +262,7 @@ pipeline {
                                 // Push changes to the configuration repository
                                 sh """
                                     git add .
-                                    git commit -m 'Jenkins Deploy - Build No. ${BUILD_NUMBER}, Version ${CALCULATED_VERSION}'
+                                    git commit -m 'Jenkins Says - Build No. ${BUILD_NUMBER}, Version ${CALCULATED_VERSION}'
                                     git push origin main
                                 """
                             }

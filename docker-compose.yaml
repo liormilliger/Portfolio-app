@@ -25,12 +25,10 @@ services:
       - backend
   
   nginx:
-    image: nginx:latest
+    build:
+      context: .
     ports:
       - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./app/static/:/usr/share/nginx/html:ro
     networks:
       - frontend
     depends_on:
