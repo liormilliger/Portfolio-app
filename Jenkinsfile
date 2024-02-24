@@ -89,7 +89,7 @@ pipeline {
             }
         }
 
-        stage("Test"){
+        stage("Test-Stage"){
             stages {
                 stage ("Containers UP") {
                     steps {
