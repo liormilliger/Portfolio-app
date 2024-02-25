@@ -8,8 +8,6 @@ pipeline {
         DOCKERHUB_KEY = credentials('DockerHub-Token')
         DOCKERHUB_REG_PROD = 'liormilliger/blog-app-prod'
         DOCKERHUB_REG_DEV = 'liormilliger/blog-app-dev'
-        ECR_USER = '644435390668.dkr.ecr.us-east-1.amazonaws.com'
-        ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
         // Repo Associated
         CONFIG_REPO = 'git@github.com:liormilliger/Portfolio-config.git'
         CONFIG_REPO_DIR = 'Portfolio-config'
@@ -66,10 +64,19 @@ pipeline {
         stage('Environment variable configuration') {
             steps {
                 script {
+                    // Main Branch Repository
+                    def dockerhubRegistry = "${DOCKERHUB_REG_PROD}"
+
+                    // Dev Branch Repository
+                    if (BRANCH_NAME =~ /^dev.*/) {
+                       dockerhubRegistry = "${DOCKERHUB_REG_DEV}" 
+
+                    }
                     echo "last version is ${CALCULATED_VERSION}"
                     // Configure environment variables for Docker image tags
-                    REMOTE_IMG_TAG = "${DOCKERHUB_REG_PROD}:${CALCULATED_VERSION}"
-                    REMOTE_IMG_LTS_TAG = "${DOCKERHUB_REG_PROD}:latest"
+                    REMOTE_REGISTRY = "${dockerhubRegistry}"
+                    REMOTE_IMG_TAG = "${REMOTE_REGISTRY}:${CALCULATED_VERSION}"
+                    REMOTE_IMG_LTS_TAG = "${REMOTE_REGISTRY}:latest"
                     LOCAL_IMG_TAG = "blogapp:${CALCULATED_VERSION}"
                 }
             }
@@ -136,15 +143,15 @@ pipeline {
 
         stage('Publish Images') {
 
-            // when {
-            //     // Publish images only for specific branches
-            //     anyOf {
-            //         branch 'main'
-            //         expression {
-            //             return BRANCH_NAME.startsWith('dev')
-            //         }
-            //     }
-            // }
+            when {
+                // Publish images only for specific branches
+                anyOf {
+                    branch 'main'
+                    expression {
+                        return BRANCH_NAME.startsWith('dev')
+                    }
+                }
+            }
 
             stages {
                 stage("Tag Images") {
@@ -165,8 +172,8 @@ pipeline {
                             // Login to DockerHub with credentials
                             sh """
                                 echo $DOCKERHUB_KEY_PSW | docker login -u $DOCKERHUB_KEY_USR --password-stdin
-                                    docker push ${REMOTE_IMG_TAG}
-                                    docker push ${REMOTE_IMG_LTS_TAG}
+                                docker push ${REMOTE_IMG_TAG}
+                                docker push ${REMOTE_IMG_LTS_TAG}
                             """
                         }
                     }
@@ -193,7 +200,7 @@ pipeline {
                     sh """
                         docker rmi ${LOCAL_IMG_TAG}
                         docker rmi "${REMOTE_IMG_TAG}"
-                        docker logout ${DOCKERHUB_REG_PROD}
+                        docker logout ${REMOTE_REGISTRY}
                     """
                 }
             }
