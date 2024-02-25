@@ -164,7 +164,7 @@ pipeline {
                         script {
                             // Login to DockerHub with credentials
                             // sh """
-                                docker.withRegistry([url: "${DOCKERHUB_REG_PROD}", credentialsId: "${DOCKERHUB_KEY}"]){
+                                docker.withRegistry(registryUrl: "${DOCKERHUB_REG_PROD}", credentialsId: "${DOCKERHUB_KEY}"){
                                     docker.image("${REMOTE_IMG_TAG}").push()
                                     docker.image("${REMOTE_IMG_LTS_TAG}").push()
                                 }
