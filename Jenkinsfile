@@ -1,3 +1,18 @@
+def findLatestTag(tags, releaseVersion) {
+    def tagArray = tags.split('\n')
+    def latestTag = null
+
+    // Iterate through the tags to find a tag starting with releaseVersion
+    for (tag in tagArray) {
+        if (tag.startsWith(releaseVersion)) {
+            latestTag = tag
+            break
+        }
+    }
+
+    return latestTag // returns latestTag variable
+}
+
 pipeline {
     
     agent any
@@ -275,17 +290,3 @@ pipeline {
     }
 }
 
-def findLatestTag(tags, releaseVersion) {
-    def tagArray = tags.split('\n')
-    def latestTag = null
-
-    // Iterate through the tags to find a tag starting with releaseVersion
-    for (tag in tagArray) {
-        if (tag.startsWith(releaseVersion)) {
-            latestTag = tag
-            break
-        }
-    }
-
-    return latestTag // returns latestTag variable
-}
