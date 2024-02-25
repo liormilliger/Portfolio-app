@@ -163,10 +163,12 @@ pipeline {
                     steps {
                         script {
                             // Login to DockerHub with credentials
-                            docker.withRegistry('', ${DOCKERHUB_KEY}){
-                                dockerImage.push ${REMOTE_IMG_TAG}
-                                dockerImage.push ${REMOTE_IMG_LTS_TAG}
-                            }
+                            // sh """
+                                docker.withRegistry(${DOCKERHUB_REG_PROD}, ${DOCKERHUB_KEY}){
+                                    docker push ${REMOTE_IMG_TAG}
+                                    docker push ${REMOTE_IMG_LTS_TAG}
+                                }
+                            // """
                         }
                     }
                 }
