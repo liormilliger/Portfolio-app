@@ -4,12 +4,19 @@ pipeline {
 
     environment {
         // Define environment variables
+        // Image Registries and Related
+        DOCKERHUB_KEY = 'DockerHub-Token'
+
+        DOCKERHUB_REG_PROD = 'liormilliger/blog-app-prod'
+        DOCKERHUB_REG_DEV = 'liormilliger/blog-app-dev'
         ECR_USER = '644435390668.dkr.ecr.us-east-1.amazonaws.com'
         ECR_REPO_URL = '644435390668.dkr.ecr.us-east-1.amazonaws.com/liorm-portfolio'
+        // Repo Associated
         CONFIG_REPO = 'git@github.com:liormilliger/Portfolio-config.git'
         CONFIG_REPO_DIR = 'Portfolio-config'
         APP_REPO = 'git@github.com:liormilliger/Portfolio-app.git'
         GIT_SSH_KEY = "GitHub-key"
+        // For Local Build
         MONGO_URI = credentials('MONGO_URI')
         MONGO_INITDB_ROOT_USERNAME = credentials('MONGO_INITDB_ROOT_USERNAME')
         MONGO_INITDB_ROOT_PASSWORD = credentials('MONGO_INITDB_ROOT_PASSWORD')
@@ -62,8 +69,8 @@ pipeline {
                 script {
                     echo "last version is ${CALCULATED_VERSION}"
                     // Configure environment variables for Docker image tags
-                    REMOTE_IMG_TAG = "${ECR_REPO_URL}:${CALCULATED_VERSION}"
-                    REMOTE_IMG_LTS_TAG = "${ECR_REPO_URL}:latest"
+                    REMOTE_IMG_TAG = "${DOCKERHUB_REG_PROD}:${CALCULATED_VERSION}"
+                    REMOTE_IMG_LTS_TAG = "${DOCKERHUB_REG_PROD}:latest"
                     LOCAL_IMG_TAG = "blogapp:${CALCULATED_VERSION}"
                 }
             }
@@ -130,15 +137,15 @@ pipeline {
 
         stage('Publish Images') {
 
-            when {
-                // Publish images only for specific branches
-                anyOf {
-                    branch 'main'
-                    expression {
-                        return BRANCH_NAME.startsWith('dev')
-                    }
-                }
-            }
+            // when {
+            //     // Publish images only for specific branches
+            //     anyOf {
+            //         branch 'main'
+            //         expression {
+            //             return BRANCH_NAME.startsWith('dev')
+            //         }
+            //     }
+            // }
 
             stages {
                 stage("Tag Images") {
@@ -155,11 +162,11 @@ pipeline {
 
                 stage("Push Images") {
                     steps {
-                        // Push Docker images to ECR registry
+                        // Push Docker images to DockerHub registry
                         echo 'Pushing Images to Registry'
                         script {
                             sh """
-                                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_USER}
+                                docker login
                                 docker push ${REMOTE_IMG_TAG}
                                 docker push ${REMOTE_IMG_LTS_TAG}
                                 """
@@ -188,7 +195,7 @@ pipeline {
                     sh """
                         docker rmi ${LOCAL_IMG_TAG}
                         docker rmi "${REMOTE_IMG_TAG}"
-                        docker logout ${ECR_REPO_URL}
+                        docker logout ${DOCKERHUB_REG_PROD}
                     """
                 }
             }
