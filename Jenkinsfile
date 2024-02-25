@@ -38,7 +38,6 @@ pipeline {
                         // Get all tags from the repository
                         sh 'git fetch --tags'
                         def tags = sh(script: 'git tag -l | sort -r -V', returnStdout: true).trim()
-                        // def tags = sh(script: 'git tag -l --merge | sort -r -V', returnStdout: true).trim()
 
                         def latestTag = findLatestTag(tags, releaseVersion)
                         def calculatedVersion = ''
