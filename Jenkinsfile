@@ -6,8 +6,6 @@ pipeline {
         // Define environment variables
         // Image Registries and Related
         DOCKERHUB_KEY = 'DockerHub-Token'
-        DOCKERHUB_USERNAME = credentials('Username')
-        DOCKERHUB_PASSWORD = credentials('password')
         DOCKERHUB_REG_PROD = 'liormilliger/blog-app-prod'
         DOCKERHUB_REG_DEV = 'liormilliger/blog-app-dev'
         ECR_USER = '644435390668.dkr.ecr.us-east-1.amazonaws.com'
@@ -165,13 +163,10 @@ pipeline {
                     steps {
                         script {
                             // Login to DockerHub with credentials
-                            sh """
-                                docker login --username ${DOCKERHUB_USERNAME} --password ${DOCKERHUB_USERNAME}
-                                echo 'Pushing Images to Registry'
-                                docker login
-                                docker push ${REMOTE_IMG_TAG}
-                                docker push ${REMOTE_IMG_LTS_TAG}
-                            """
+                            docker.withRegistry('', ${DOCKERHUB_KEY}){
+                                dockerImage.push ${REMOTE_IMG_TAG}
+                                dockerImage.push ${REMOTE_IMG_LTS_TAG}
+                            }
                         }
                     }
                 }
