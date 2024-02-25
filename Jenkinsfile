@@ -52,7 +52,8 @@ pipeline {
 
                         // Get all tags from the repository
                         sh 'git fetch --tags'
-                        def tags = sh(script: 'git tag -l --merge | sort -r -V', returnStdout: true).trim()
+                        def tags = sh(script: 'git tag -l | sort -r -V', returnStdout: true).trim()
+                        // def tags = sh(script: 'git tag -l --merge | sort -r -V', returnStdout: true).trim()
 
                         def latestTag = findLatestTag(tags, releaseVersion)
                         def calculatedVersion = ''
@@ -75,7 +76,7 @@ pipeline {
         stage('Environment variable configuration') {
             steps {
                 script {
-                    echo "${CALCULATED_VERSION}"
+                    echo "last version is ${CALCULATED_VERSION}"
                     // Configure environment variables for Docker image tags
                     REMOTE_IMG_TAG = "${ECR_REPO_URL}:${CALCULATED_VERSION}"
                     REMOTE_IMG_LTS_TAG = "${ECR_REPO_URL}:latest"
