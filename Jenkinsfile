@@ -6,7 +6,7 @@ pipeline {
         // Define environment variables
         // Image Registries and Related
         DOCKERHUB_KEY = 'DockerHub-Token'
-        DOCKERHUB_USERNAME = credentials('username')
+        DOCKERHUB_USERNAME = credentials('Username')
         DOCKERHUB_PASSWORD = credentials('password')
         DOCKERHUB_REG_PROD = 'liormilliger/blog-app-prod'
         DOCKERHUB_REG_DEV = 'liormilliger/blog-app-dev'
