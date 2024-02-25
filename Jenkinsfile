@@ -118,7 +118,6 @@ pipeline {
                     }
                 }
             }
-
             post {
                 always {
                     // Shut down Docker containers after testing
@@ -239,7 +238,6 @@ pipeline {
                         }
                     }
                 }
-
                 stage('Push Changes') {
                     when {
                         anyOf {
