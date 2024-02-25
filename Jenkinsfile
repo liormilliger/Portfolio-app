@@ -1,18 +1,3 @@
-def findLatestTag(tags, releaseVersion) {
-    def tagArray = tags.split('\n')
-    def latestTag = null
-
-    // Iterate through the tags to find a tag starting with releaseVersion
-    for (tag in tagArray) {
-        if (tag.startsWith(releaseVersion)) {
-            latestTag = tag
-            break
-        }
-    }
-
-    return latestTag // returns latestTag variable
-}
-
 pipeline {
     
     agent any
@@ -105,28 +90,56 @@ pipeline {
                         // }
                     }
                 }
-                stage ("Test") {
+                stage('Health Check') {
                     steps {
-                        // Execute tests against the application
-                        echo "========EXECUTING TESTS=========="
+                        script {
+                            def retries = 10
+                            def waitTimeSeconds = 5
+                            def url = 'http://localhost:80'
+                            
+                            def success = false
+                            for (int i = 0; i < retries; i++) {
+                                def response = sh(script: "curl -sfSLI ${url}", returnStatus: true)
+                                
+                                if (response == 0) {
+                                    echo "Health check succeeded. HTTP response code: 200"
+                                    success = true
+                                    break
+                                }
+                                else {
+                                    echo "Health check failed. Retrying in ${waitTimeSeconds} seconds..."
+                                    sleep waitTimeSeconds
+                                }
+                            }
 
-                        script{
-                            sh """#!/bin/bash
-                                for ((i=1; i<=10; i++)); do
-                                    responseCode=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost:80)
-                                            
-                                    if [[ \${responseCode} == '200' ]]; then
-                                        echo "Health check succeeded. HTTP response code: \${responseCode}"
-                                        break
-                                    else
-                                        echo "Health check failed. HTTP response code: \${responseCode}. Retrying in 5 seconds..."
-                                        sleep 5
-                                    fi
-                                done
-                            """
+                            if (!success) {
+                                error "Health check failed after ${retries} retries"
+                            }
                         }
                     }
                 }
+                // stage ("Test") {
+                //     steps {
+                //         // Execute tests against the application
+                //         echo "========EXECUTING TESTS=========="
+
+                //         script{
+                //             sh """#!/bin/bash
+                //                 for ((i=1; i<=10; i++)); do
+                //                     responseCode=\$(curl -s -o /dev/null -w '%{http_code}' http://localhost:80)
+                                            
+                //                     if [[ \${responseCode} == '200' ]]; then
+                //                         echo "Health check succeeded. HTTP response code: \${responseCode}"
+                //                         break
+                //                     else
+                //                         echo "Health check failed. HTTP response code: \${responseCode}. Retrying in 5 seconds..."
+                //                         sleep 5
+                //                     fi
+                //                 done
+                //             """
+                //         }
+                //     }
+                // }
             }
 
             post {
@@ -290,5 +303,20 @@ pipeline {
             '''
         }
     }
+}
+
+def findLatestTag(tags, releaseVersion) {
+    def tagArray = tags.split('\n')
+    def latestTag = null
+
+    // Iterate through the tags to find a tag starting with releaseVersion
+    for (tag in tagArray) {
+        if (tag.startsWith(releaseVersion)) {
+            latestTag = tag
+            break
+        }
+    }
+
+    return latestTag // returns latestTag variable
 }
 
