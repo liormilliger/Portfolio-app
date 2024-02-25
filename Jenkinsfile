@@ -162,14 +162,23 @@ pipeline {
 
                 stage("Push Images") {
                     steps {
-                        // Push Docker images to DockerHub registry
-                        echo 'Pushing Images to Registry'
                         script {
+                            // Retrieve DockerHub credentials from Jenkins credentials
+                            def dockerHubCredentials = credentials('DOCKERHUB_KEY')
+                            
+                            // Get the username and password from the credentials
+                            def username = dockerHubCredentials.username
+                            def password = dockerHubCredentials.password
+                            
+                            // Login to DockerHub with credentials
                             sh """
+                                echo ${password} | docker login --username ${username} --password-stdin
+                                // Push Docker images to DockerHub registry
+                                echo 'Pushing Images to Registry'
                                 docker login
                                 docker push ${REMOTE_IMG_TAG}
                                 docker push ${REMOTE_IMG_LTS_TAG}
-                                """
+                            """
                         }
                     }
                 }
