@@ -75,6 +75,7 @@ pipeline {
         stage('Environment variable configuration') {
             steps {
                 script {
+                    echo "${calculatedVersion}"
                     // Configure environment variables for Docker image tags
                     REMOTE_IMG_TAG = "${ECR_REPO_URL}:${CALCULATED_VERSION}"
                     REMOTE_IMG_LTS_TAG = "${ECR_REPO_URL}:latest"
